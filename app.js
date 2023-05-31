@@ -2,6 +2,7 @@ import express  from "express";
 import mongoose from "mongoose";
 import morgan from "morgan";
 import { router as userRouter } from "./src/routers/user.route.js"
+import { router as vendorRouter } from "./src/routers/vendor.route.js"
 import { globalErrorHandler } from "./src/utils/errorHandler.js"
 import { config } from "./src/config/index.js";
 import cookieParser from "cookie-parser";
@@ -24,6 +25,7 @@ app.use(cookieParser())
 
 // Routes 
 app.use('/api/v1/user', userRouter)
+app.use('/api/v1/vendor', vendorRouter)
 
 app.use(globalErrorHandler)
 
