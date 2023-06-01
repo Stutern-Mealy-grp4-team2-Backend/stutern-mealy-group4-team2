@@ -6,9 +6,13 @@ import { router as vendorRouter } from "./src/routers/vendor.route.js"
 import { globalErrorHandler } from "./src/utils/errorHandler.js"
 import { config } from "./src/config/index.js";
 import cookieParser from "cookie-parser";
+import cors from "cors"
 
 
 const app = express()
+
+// Enable CORS for all routes
+app.use(cors());
 
 
 // Database connection
