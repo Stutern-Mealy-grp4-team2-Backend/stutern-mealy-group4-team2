@@ -6,8 +6,7 @@ import {config} from "../config/index.js"
 import crypto from "crypto"
 import { sendEmail } from "../utils/sendEmail.js"
 import { generateToken } from "../utils/jwt.utils.js"
-import jwt from "jsonwebtoken"
-import cookieParser from "cookie-parser"
+
 
 
 
@@ -142,59 +141,133 @@ export default class UserController {
         })
 
     }
-// Validate the reset password code
 
-    static async resetPasswordCode(req, res,) {
-      //Get hashed token
+    static async resetPasswordCode(req, res) {
       const { resetPasswordToken } = req.body;
       const user = await User.findOne({
         resetPasswordToken,
-        resetPasswordExpire: { $gt: Date.now() }
-      })
-      // const user = await User.findOne({
-      //   resetPasswordToken: {
-      //     $eq: resetPasswordToken.toString(),
-      //   },
-      //   resetPasswordExpire: { $gt: Date.now() },
-      // });
-      if (!user) throw new UnAuthorizedError('Unauthorized')
+        resetPasswordExpire: { $gt: Date.now() },
+      });
+      if (!user) throw new UnAuthorizedError("Invalid or expired reset password token");
       res.status(200).json({
         status: "Success",
-        message: "Please input your new password"
-        })
-
+        message: "Please input your new password",
+      });
     }
 
-    static async resetPassword(req, res,) {
-      // //Get hashed token
-      const resetPasswordToken = req.params.resetPasswordToken;
-     
-      // const resetPasswordToken = crypto
-      // .createHash('sha256')
-      // .update(req.params.resetPasswordToken)
-      // .digest('hex');
-      // //const { id } = req.query
-      const user = await User.findOne({
-        resetPasswordToken,
-        resetPasswordExpire: { $gt: Date.now() }
-      })
-      if (!user) throw new UnAuthorizedError('Unauthorized')
-      console.log(user)
-      // Set Password
-      const { error } = resetPasswordValidator.validate(req.body)
-      if (error) throw error
-      const saltRounds = config.bycrypt_salt_round
-      user.password = bcrypt.hashSync(req.body.password, saltRounds);
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpire = undefined;
-      await user.save();
-      //sendTokenResponse(user, 200, res);
-      res.status(200).json({
-      status: "Success",
-      message: "Password updated successfully",
-      data: user
-      })
+    static async resetPassword(req, res) {
+      // const { resetPasswordToken } = req.params;
+    
+      const { resetPasswordToken } = req.params;
+    
+        // Hash the new password
+        const { error } = resetPasswordValidator.validate(req.body);
+        if (error) throw error;
+        const { password } = req.body;
+        const saltRounds = config.bycrypt_salt_round;
+        const hashedPassword = bcrypt.hashSync(password, saltRounds);
+    
+        // Update the user's password
+        const result = await User.updateOne(
+          {
+            resetPasswordToken,
+            resetPasswordExpires: { $gt: Date.now() },
+          },
+          {
+            password: hashedPassword,
+            resetPasswordToken: undefined,
+            resetPasswordExpires: undefined,
+          }
+        );
+    
+        if (result.n === 0) throw new BadUserRequestError('Invalid or expired reset password token.')
+    
+        res.status(200).json({
+          message: 'Password reset successful.',
+          status: 'Success',
+        });
+    
+      // // Find the user by the reset password token
+      // const user = await User.findOne({
+      //   resetPasswordToken,
+      //   resetPasswordExpire: { $gt: Date.now() },
+      // });
+    
+      // // Check if the user exists
+      // if (!user) {
+      //   throw new NotFoundError('Invalid or expired reset password token');
+      // }
+      // const { password } = req.body;
+      //  // Validate the request body
+      // const { error } = resetPasswordValidator.validate(req.body);
+      // if (error) throw error;
+      // // Hash the new password
+      // const saltRounds = config.bycrypt_salt_round;
+      // const hashedPassword = bcrypt.hashSync(password, saltRounds);
+    
+      // // Set the new hashed password
+      // user.password = hashedPassword;
+      // user.resetPasswordToken = undefined;
+      // user.resetPasswordExpire = undefined;
+    
+      // // Save the user with the new hashed password
+      // await user.save();
+    
+      // res.status(200).json({
+      //   status: 'Success',
+      //   message: 'Password reset successful',
+      // });
     }
+
+    
+    // static async resetPassword(req, res) {
+    //   const resetPasswordToken = req.params.resetPasswordToken;
+    //   const user = await User.findOne({
+    //     resetPasswordToken,
+    //     resetPasswordExpire: { $gt: Date.now() },
+    //   });
+    //   if (!user) throw new UnAuthorizedError("Invalid or expired reset password token");
+  
+    //   const { error } = resetPasswordValidator.validate(req.body);
+    //   if (error) throw error;
+  
+    //   const saltRounds = config.bycrypt_salt_round;
+    //   user.password = bcrypt.hashSync(req.body.password, saltRounds);
+    //   user.resetPasswordToken = undefined;
+    //   user.resetPasswordExpire = undefined;
+    //   await user.save();
+  
+    //   res.status(200).json({
+    //     status: "Success",
+    //     message: "Password updated successfully",
+    //     data: user,
+    //   });
+    // }
+    // static async resetPassword(req, res,) {
+    //   //Get hashed token
+    //   const resetPasswordToken = req.params.resetPasswordToken;
+      
+    //   const user = await User.findOne({
+    //     resetPasswordToken,
+    //     resetPasswordExpire: { $gt: Date.now() }
+    //   })
+    //   if (!user) throw new UnAuthorizedError('Unauthorized')
+    //   console.log(user)
+    //   // Set Password
+    //   const { error } = resetPasswordValidator.validate(req.body)
+    //   if (error) throw error
+    //   const saltRounds = config.bycrypt_salt_round
+    //   user.password = bcrypt.hashSync(req.body.password, saltRounds);
+    //   user.resetPasswordToken = undefined;
+    //   user.resetPasswordExpire = undefined;
+    //   await user.save();
+    //   res.status(200).json({
+    //   status: "Success",
+    //   message: "Password updated successfully",
+    //   data: user
+    //   })
+    // }
+
     static async userLogout(req, res,) {
       
       res.status(200).json({
@@ -264,4 +337,6 @@ export default class UserController {
 }
 
     
+
+
 

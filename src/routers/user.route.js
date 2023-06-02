@@ -9,7 +9,7 @@ router.post("/signup", tryCatchHandler(UserController.createUser) )
 router.get('/verify/:verifyEmailToken', tryCatchHandler( UserController.verifyUser) );
 router.post("/signin", tryCatchHandler( UserController.loginUser) )
 router.post("/forgotpassword", tryCatchHandler( UserController.forgotPassword) )
-router.post("/resetpasswordcode", tryCatchHandler( UserController.resetPasswordCode) )
+router.post("/resetpassword/code", tryCatchHandler( UserController.resetPasswordCode) )
 router.put("/resetpassword/:resetPasswordToken", tryCatchHandler( UserController.resetPassword) )
 router.get("/", tryCatchHandler( UserController.findUser) )
 router.get("/users", tryCatchHandler( UserController.findAll) )
