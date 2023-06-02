@@ -118,8 +118,11 @@ export default class UserController {
       if (!user) throw new UnAuthorizedError("Please provide a valid email address")
       // Get reset token
       const resetPasswordToken = Math.floor(100000 + Math.random() * 900000).toString();
-      
-      await user.save({ validateBeforeSave: false })
+      const newUser = new User ({
+        resetPasswordToken,
+        resetPasswordExpire: Date.now() + 10 * 60 * 1000,
+        });
+      await newUser.save({ validateBeforeSave: false })
 
       // create reset URL
       //const resetUrl = `Helloe ${user.name}, Your verification code is: ${resetPasswordToken}`;
@@ -163,7 +166,7 @@ export default class UserController {
     }
 
     static async resetPassword(req, res,) {
-      //Get hashed token
+      // //Get hashed token
       const resetPasswordToken = req.params.resetPasswordToken;
      
       // const resetPasswordToken = crypto

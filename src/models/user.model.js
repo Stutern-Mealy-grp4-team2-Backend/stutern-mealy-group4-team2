@@ -27,9 +27,15 @@ const UserSchema = new Schema({
     type: Boolean,
     default: false,
   },
-  verifyEmailToken: String,
+  verifyEmailToken: {
+    type: String,
+    default: null,
+  },
   verifyEmailTokenExpire: Date,
-  resetPasswordToken: String,
+  resetPasswordToken: {
+    type: String,
+    default: null,
+  },
   resetPasswordExpire: Date,
 }, {
   timestamps: true
@@ -45,8 +51,8 @@ UserSchema.methods.getResetPasswordToken = function () {
   .digest('hex');
 
   // Set expire
-  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
-  return resetPasswordToken
+  // this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+  // return resetPasswordToken
 }
 
 
