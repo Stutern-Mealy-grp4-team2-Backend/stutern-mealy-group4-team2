@@ -33,7 +33,7 @@ export default class UserController {
       // Generate verification token
       const saltRounds = config.bycrypt_salt_round
       // Hash verification token
-      const verifyEmailToken = Math.floor(1000 + Math.random() * 9000);
+      const verifyEmailToken = crypto.randomBytes(20).toString('hex');
       // Hash password
       const hashedPassword = bcrypt.hashSync(password, saltRounds);
       const user = new User ({
@@ -48,7 +48,8 @@ export default class UserController {
       // create reset URL
       // const verifyEmailUrl = `${req.protocol}://${req.get('host')}/api/v1/user/verify/${verifyEmailToken}`;
       // Set body of email
-      const message = `Your account verification code is: ${verifyEmailToken}`
+      const verifyEmailUrl = `${req.protocol}://${req.get('host')}/api/v1/user/verify/${verifyEmailToken}`;
+      const message = `Hi ${name}, please click on the following link to activate your account: ${verifyEmailUrl}`
       
       const mailSent = await sendEmail({
           email: user.email,
@@ -65,7 +66,7 @@ export default class UserController {
     }
     
     static async verifyUser(req, res) {
-      const verifyEmailToken = req.body.verifyEmailToken;
+      const verifyEmailToken = req.params.verifyEmailToken;
       // Find the user by the verification token
       const user = await User.findOne({
         verifyEmailToken,
@@ -116,14 +117,14 @@ export default class UserController {
       const user = await User.findOne({ email })
       if (!user) throw new UnAuthorizedError("Please provide a valid email address")
       // Get reset token
-      const resetPasswordToken = user.getResetPasswordToken();
+      const resetPasswordToken = Math.floor(100000 + Math.random() * 900000).toString();
       
       await user.save({ validateBeforeSave: false })
 
       // create reset URL
-      const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/user/resetpassword/${resetPasswordToken}`;
+      //const resetUrl = `Helloe ${user.name}, Your verification code is: ${resetPasswordToken}`;
 
-      const message = `You are receiving this email because you requested for a password reset. Please click the following link to reset your password: \n\n ${resetUrl}`
+      const message = `Hello ${user.name}, Your verification code is: ${resetPasswordToken}`
       
       await sendEmail({
           email:user.email,
@@ -138,15 +139,38 @@ export default class UserController {
         })
 
     }
-// // Validate the new password
+// Validate the reset password code
+
+    static async resetPasswordCode(req, res,) {
+      //Get hashed token
+      const { resetPasswordToken } = req.body;
+      const user = await User.findOne({
+        resetPasswordToken,
+        resetPasswordExpire: { $gt: Date.now() }
+      })
+      // const user = await User.findOne({
+      //   resetPasswordToken: {
+      //     $eq: resetPasswordToken.toString(),
+      //   },
+      //   resetPasswordExpire: { $gt: Date.now() },
+      // });
+      if (!user) throw new UnAuthorizedError('Unauthorized')
+      res.status(200).json({
+        status: "Success",
+        message: "Please input your new password"
+        })
+
+    }
 
     static async resetPassword(req, res,) {
       //Get hashed token
-      const resetPasswordToken = crypto
-      .createHash('sha256')
-      .update(req.params.resetPasswordToken)
-      .digest('hex');
-      //const { id } = req.query
+      const resetPasswordToken = req.params.resetPasswordToken;
+     
+      // const resetPasswordToken = crypto
+      // .createHash('sha256')
+      // .update(req.params.resetPasswordToken)
+      // .digest('hex');
+      // //const { id } = req.query
       const user = await User.findOne({
         resetPasswordToken,
         resetPasswordExpire: { $gt: Date.now() }
@@ -168,8 +192,6 @@ export default class UserController {
       data: user
       })
     }
-
-
     static async userLogout(req, res,) {
       
       res.status(200).json({
