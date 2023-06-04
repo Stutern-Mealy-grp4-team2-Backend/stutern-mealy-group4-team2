@@ -3,11 +3,9 @@ import { BadUserRequestError, NotFoundError, UnAuthorizedError } from "../errors
 import User from "../models/user.model.js"
 import bcrypt from "bcrypt"
 import {config} from "../config/index.js"
-import crypto from "crypto"
 import { sendEmail } from "../utils/sendEmail.js"
 import { generateToken } from "../utils/jwt.utils.js"
-import jwt from "jsonwebtoken"
-import cookieParser from "cookie-parser"
+import crypto from "crypto";
 
 
 
@@ -33,7 +31,7 @@ export default class UserController {
       // Generate verification token
       const saltRounds = config.bycrypt_salt_round
       // Hash verification token
-      const verifyEmailToken = Math.floor(1000 + Math.random() * 9000);
+      const verifyEmailToken = crypto.randomBytes(20).toString('hex');
       // Hash password
       const hashedPassword = bcrypt.hashSync(password, saltRounds);
       const user = new User ({
@@ -48,7 +46,8 @@ export default class UserController {
       // create reset URL
       // const verifyEmailUrl = `${req.protocol}://${req.get('host')}/api/v1/user/verify/${verifyEmailToken}`;
       // Set body of email
-      const message = `Your account verification code is: ${verifyEmailToken}`
+      const verifyEmailUrl = `${req.protocol}://${req.get('host')}/api/v1/user/verify/${verifyEmailToken}`;
+      const message = `Hi ${name}, please click on the following link to activate your account: ${verifyEmailUrl}`
       
       const mailSent = await sendEmail({
           email: user.email,
@@ -65,7 +64,7 @@ export default class UserController {
     }
     
     static async verifyUser(req, res) {
-      const verifyEmailToken = req.body.verifyEmailToken;
+      const verifyEmailToken = req.params.verifyEmailToken;
       // Find the user by the verification token
       const user = await User.findOne({
         verifyEmailToken,
@@ -95,6 +94,9 @@ export default class UserController {
       const user = await User.findOne({ email }).select('+password')
       //if(!user.isVerified) throw new UnAuthorizedError ('Please verify your account')
       if(!user) throw new UnAuthorizedError("Invalid login details")
+      if (!user.isVerified) {
+        throw new UnAuthorizedError(`Please login to ${user.email} to activate your account before logging in.`);
+      }
       // Compare Passwords
       const isMatch = bcrypt.compareSync(password, user.password)
       if(!isMatch) throw new UnAuthorizedError("Invalid login details")
@@ -116,14 +118,17 @@ export default class UserController {
       const user = await User.findOne({ email })
       if (!user) throw new UnAuthorizedError("Please provide a valid email address")
       // Get reset token
-      const resetPasswordToken = user.getResetPasswordToken();
-      
-      await user.save({ validateBeforeSave: false })
-
+      const resetPasswordToken = Math.floor(100000 + Math.random() * 900000).toString();
+      // Get reset Expire
+      const resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+      // Update user with reset token and expiration date
+      user.resetPasswordToken = resetPasswordToken;
+      user.resetPasswordExpire = resetPasswordExpire;
+      await user.save();
       // create reset URL
-      const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/user/resetpassword/${resetPasswordToken}`;
+      //const resetUrl = `Helloe ${user.name}, Your verification code is: ${resetPasswordToken}`;
 
-      const message = `You are receiving this email because you requested for a password reset. Please click the following link to reset your password: \n\n ${resetUrl}`
+      const message = `Hello ${user.name}, Your verification code is: ${resetPasswordToken}`
       
       await sendEmail({
           email:user.email,
@@ -138,38 +143,48 @@ export default class UserController {
         })
 
     }
-// // Validate the new password
+      //  verify the Reset password code
 
-    static async resetPassword(req, res,) {
-      //Get hashed token
-      const resetPasswordToken = crypto
-      .createHash('sha256')
-      .update(req.params.resetPasswordToken)
-      .digest('hex');
-      //const { id } = req.query
+    static async resetPasswordCode(req, res) {
+      const { resetPasswordToken } = req.body;
+      console.log(resetPasswordToken)
       const user = await User.findOne({
         resetPasswordToken,
-        resetPasswordExpire: { $gt: Date.now() }
-      })
-      if (!user) throw new UnAuthorizedError('Unauthorized')
+        resetPasswordExpire: { $gt: Date.now() },
+      });
       console.log(user)
-      // Set Password
-      const { error } = resetPasswordValidator.validate(req.body)
-      if (error) throw error
-      const saltRounds = config.bycrypt_salt_round
+      if (!user) throw new UnAuthorizedError("Invalid or expired reset password token");
+      res.status(200).json({
+        status: "Success",
+        message: "Please input your new password",
+      });
+    }
+    // Update the Password
+    static async resetPassword(req, res) {
+      const  resetPasswordToken  = req.params.resetPasswordToken;
+      console.log(resetPasswordToken)
+      const user = await User.findOne({
+        resetPasswordToken,
+        resetPasswordExpire: { $gt: Date.now() },
+      });
+      if (!user) throw new UnAuthorizedError("Invalid or expired reset password token");
+      // validate new password
+      const { error } = resetPasswordValidator.validate(req.body);
+      if (error) throw error;
+      // Hash new password
+      const saltRounds = config.bycrypt_salt_round;
       user.password = bcrypt.hashSync(req.body.password, saltRounds);
       user.resetPasswordToken = undefined;
       user.resetPasswordExpire = undefined;
       await user.save();
-      //sendTokenResponse(user, 200, res);
+  
       res.status(200).json({
-      status: "Success",
-      message: "Password updated successfully",
-      data: user
-      })
+        status: "Success",
+        message: "Password updated successfully",
+        data: user,
+      });
     }
-
-
+        
     static async userLogout(req, res,) {
       
       res.status(200).json({
@@ -239,4 +254,6 @@ export default class UserController {
 }
 
     
+
+
 
