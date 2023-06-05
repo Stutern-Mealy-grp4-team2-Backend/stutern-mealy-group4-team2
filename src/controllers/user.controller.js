@@ -37,7 +37,6 @@ export default class UserController {
       const verifyEmailToken = crypto.randomBytes(20).toString('hex');
       // Hash password
       const hashedPassword = bcrypt.hashSync(password, saltRounds);
-      console.log(hashedPassword)
       const user = new User ({
       name,
       email,
@@ -47,7 +46,6 @@ export default class UserController {
       });
       
      await user.save()
-     console.log(user)
       // create verification email URL
       const verifyEmailUrl = `${req.protocol}://${req.get('host')}/api/v1/user/verify/${verifyEmailToken}`;
        // Set body of email
@@ -59,7 +57,6 @@ export default class UserController {
           message
         })
         if(mailSent === false) throw new NotFoundError(`${email} cannot be verified. Please provide a valid email address`)
-        console.log(mailSent)
         res.status(200).json({
           status: 'Success',
           message: `An email verification link has been sent to ${email}.`,
