@@ -19,34 +19,38 @@ export default class UserController {
       if (error) throw error
       const { name, email, password } = req.body;
       // Confirm  email has not been used by another user
-      const existingUser = await User.findOne({ email })
+      const existingUser = await User.findOne({ email });
       if (existingUser) {
-        if (existingUser.isVerified) {
-          throw new BadUserRequestError(`An account with ${email} already exists.`);
-        } else {
-          throw new BadUserRequestError(`Please login to ${email} to get your verification link.`);
-        }
+      if (existingUser.isVerified) {
+      throw new BadUserRequestError(`An account with ${email} already exists.`);
+      } else if (existingUser.verifyEmailTokenExpire < Date.now()) {
+      // Remove the existing user if the verification token has expired
+      await User.deleteOne({ _id: existingUser._id });
+      throw new BadUserRequestError('An error occured. Please try signing up again.')
+      } else {
+      throw new BadUserRequestError(`Please log in to ${email} to get your verification link.`);
       }
-     
+}
       // Generate verification token
       const saltRounds = config.bycrypt_salt_round
       // Hash verification token
       const verifyEmailToken = crypto.randomBytes(20).toString('hex');
       // Hash password
       const hashedPassword = bcrypt.hashSync(password, saltRounds);
+      console.log(hashedPassword)
       const user = new User ({
       name,
       email,
       password: hashedPassword,
       verifyEmailToken,
-      verifyEmailTokenExpire: Date.now() + 15 * 60 * 1000,
+      verifyEmailTokenExpire: Date.now() + config.token_expiry,
       });
       
      await user.save()
-      // create reset URL
-      // const verifyEmailUrl = `${req.protocol}://${req.get('host')}/api/v1/user/verify/${verifyEmailToken}`;
-      // Set body of email
+     console.log(user)
+      // create verification email URL
       const verifyEmailUrl = `${req.protocol}://${req.get('host')}/api/v1/user/verify/${verifyEmailToken}`;
+       // Set body of email
       const message = `Hi ${name}, please click on the following link to activate your account: ${verifyEmailUrl}`
       
       const mailSent = await sendEmail({
@@ -85,7 +89,6 @@ export default class UserController {
       })
     }
 
-
     static async loginUser(req, res) {
       const { error } = loginUserValidator.validate(req.body)
       if (error) throw error
@@ -110,7 +113,6 @@ export default class UserController {
         }
       })
     }
-
 
     static async forgotPassword(req, res ) {
       const { email } = req.body;
@@ -143,8 +145,7 @@ export default class UserController {
         })
 
     }
-      //  verify the Reset password code
-
+    // Verify the Reset password code  
     static async resetPasswordCode(req, res) {
       const { resetPasswordToken } = req.body;
       console.log(resetPasswordToken)
