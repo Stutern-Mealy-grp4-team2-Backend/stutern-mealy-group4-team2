@@ -1,6 +1,30 @@
-import passport from 'passport';
-import { OAuth2Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { Strategy as FacebookStrategy } from 'passport-facebook';
-import config from '../config.js';
-import { generateToken } from '../utils/jwt.utils.js';
-import User from '../models/user.model.js';
+import passport from '../config/passport.js';
+
+import { generateToken } from "../utils/jwt.utils.js";
+
+export default class AuthController {
+  static async googleSignup(req, res) {
+    passport.authenticate('google', { scope: ['profile', 'email'] })(req, res);
+  }
+
+  static async googleLogin(req, res) {
+    passport.authenticate('google', { scope: ['profile', 'email'] })(req, res);
+  }
+
+  static async googleCallback(req, res) {
+    passport.authenticate('google', { session: false }, (err, user) => {
+      if (err || !user) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Google authentication failed.',
+        });
+      }
+
+      // Generate a JWT token for the authenticated user
+      const token = generateToken(user)
+
+      // Redirect the user to the desired URL with the token appended as a query parameter
+      res.redirect(`http://localhost:5000/dashboard?token=${token}`);
+    })(req, res);
+  }
+}
