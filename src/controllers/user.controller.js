@@ -33,10 +33,16 @@ export default class UserController {
 }
       // Generate verification token
       const saltRounds = config.bycrypt_salt_round
+      // Create verification token
+      const token = crypto.randomBytes(20).toString('hex');
       // Hash verification token
-      const verifyEmailToken = crypto.randomBytes(20).toString('hex');
+      const verifyEmailToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
       // Hash password
       const hashedPassword = bcrypt.hashSync(password, saltRounds);
+     
       const user = new User ({
       name,
       email,
@@ -65,7 +71,8 @@ export default class UserController {
     }
     
     static async verifyUser(req, res) {
-      const verifyEmailToken = req.params.verifyEmailToken;
+      // Extract verification token
+      const verifyEmailToken = req.params.verifyEmailToken;      
       // Find the user by the verification token
       const user = await User.findOne({
         verifyEmailToken,
