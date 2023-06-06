@@ -33,11 +33,16 @@ export default class UserController {
 }
       // Generate verification token
       const saltRounds = config.bycrypt_salt_round
+      // Create verification token
+      const token = crypto.randomBytes(20).toString('hex');
       // Hash verification token
-      const verifyEmailToken = crypto.randomBytes(20).toString('hex');
+      const verifyEmailToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
       // Hash password
       const hashedPassword = bcrypt.hashSync(password, saltRounds);
-      console.log(hashedPassword)
+     
       const user = new User ({
       name,
       email,
@@ -47,7 +52,6 @@ export default class UserController {
       });
       
      await user.save()
-     console.log(user)
       // create verification email URL
       const verifyEmailUrl = `${req.protocol}://${req.get('host')}/api/v1/user/verify/${verifyEmailToken}`;
        // Set body of email
@@ -59,7 +63,6 @@ export default class UserController {
           message
         })
         if(mailSent === false) throw new NotFoundError(`${email} cannot be verified. Please provide a valid email address`)
-        console.log(mailSent)
         res.status(200).json({
           status: 'Success',
           message: `An email verification link has been sent to ${email}.`,
@@ -68,7 +71,8 @@ export default class UserController {
     }
     
     static async verifyUser(req, res) {
-      const verifyEmailToken = req.params.verifyEmailToken;
+      // Extract verification token
+      const verifyEmailToken = req.params.verifyEmailToken;      
       // Find the user by the verification token
       const user = await User.findOne({
         verifyEmailToken,
