@@ -15,6 +15,8 @@ export const production = {
   smtp_email: process.env.PRODUCTION_SMTP_EMAIL,
   smtp_password: process.env.PRODUCTION_SMTP_PASSWORD,
   from_email: process.env.PRODUCTION_FROM_EMAIL,
-  from_name: process.env.PRODUCTION_FROM_NAME
-
+  from_name: process.env.PRODUCTION_FROM_NAME,
+  google_client_ID: process.env.PRODUCTION_GOOGLE_CLIENT_ID,
+  google_client_secret: process.env.PRODUCTION_GOOGLE_CLIENT_SECRET,
+  google_callback_url: process.env.PRODUCTION_GOOGLE_CALLBACK_URL
 }

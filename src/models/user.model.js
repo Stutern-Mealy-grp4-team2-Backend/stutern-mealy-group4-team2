@@ -30,6 +30,8 @@ const UserSchema = new Schema({
   verifyEmailTokenExpire: Date,
   resetPasswordToken: String,
   resetPasswordExpire: Date,
+  googleId: String,
+  facebookId: String,
 }, {
   timestamps: true
 });
