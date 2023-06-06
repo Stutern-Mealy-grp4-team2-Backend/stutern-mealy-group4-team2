@@ -2,6 +2,7 @@
 import { Router } from "express"
 import UserController from "../controllers/user.controller.js";
 import { tryCatchHandler } from '../utils/tryCatch.handler.js'
+import { userAuthMiddleWare } from "../middlewares/auth.middleware.js";
 // Setting up the Router
 const router = Router()
 // Setting up the User signup/login routes
@@ -16,6 +17,11 @@ router.delete("/deleteall", tryCatchHandler( UserController.deleteAll) )
 router.delete("/deleteuser/:id", tryCatchHandler( UserController.deleteUser) )
 router.get("/guestlogin", ( UserController.guestUser) )
 router.get("/logout", ( UserController.userLogout) )
+//user profile
+router.post("/profile",userAuthMiddleWare,UserController.profile)
+//update profile
+router.put("/Profile/:userId",userAuthMiddleWare,UserController.updateProfile)
+
 
 
 //Exporting the User Router

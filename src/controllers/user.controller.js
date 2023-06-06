@@ -235,6 +235,54 @@ export default class UserController {
         status: "All users delete successfully",
       })
     }
+
+
+  //user profile
+  static async profile (req,res){
+    try {
+      const user = await User.findById(req.param.userId)
+      if(user){
+        res.status(200).json({
+          name: user.name,
+          email: user.email,
+        })
+      }else{
+        res.status(404).json({message:"Sorry, you data is not found, try to register"})
+      }
+    } catch (err) {
+      res.status(404).json({
+        status:"Failed",
+        message:err.message
+      })
+    }
+  }
+
+  //update user profile
+  static async updateProfile (req,res){
+    // Joi validation
+    const {error} = createUserValidator.validate(req.body)
+    if (error) throw error
+    try {
+      const user = await User.findByIdAndUpdate({_id: req.user._id},
+        req.body,{
+          new: true,
+          runValidators: true
+        })
+      
+      const updateUser = await user.save()
+      res.status(200).json({
+        name: updateUser.name,
+        email: updateUser.email,
+        token : generateToken(updateUser)
+      })
+    } catch (err) {
+      res.status(404).json({
+        status:"Failed",
+        message:err.message
+      })
+    }
+  }
+
     
 }
 

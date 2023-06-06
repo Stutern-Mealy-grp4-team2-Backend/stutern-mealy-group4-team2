@@ -9,3 +9,5 @@ export function generateToken(user){
 export function verifyToken(token){
   return jwt.verify(token, config.jwt_secret_key)
 }
+
+
