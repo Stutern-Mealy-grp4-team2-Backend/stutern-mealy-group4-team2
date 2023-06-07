@@ -1,15 +1,12 @@
-import passport from '../config/passport.js';
+import passport from 'passport';
 
 import { generateToken } from "../utils/jwt.utils.js";
 
 export default class AuthController {
-  static async googleSignup(req, res) {
+  static async googleAuth(req, res) {
     passport.authenticate('google', { scope: ['profile', 'email'] })(req, res);
   }
 
-  static async googleLogin(req, res) {
-    passport.authenticate('google', { scope: ['profile', 'email'] })(req, res);
-  }
 
   static async googleCallback(req, res) {
     passport.authenticate('google', { session: false }, (err, user) => {
