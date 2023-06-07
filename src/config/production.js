@@ -9,6 +9,8 @@ export const production = {
   jwt_secret_key: process.env.PRODUCTION_JWT_SECRET,
   jwt_expiry: process.env.PRODUCTION_JWT_EXPIRY,
   token_expiry: +process.env.PRODUCTION_TOKEN_EXPIRY,
+  refresh_secret_key: process.env.REFRESH_SECRET_KEY,
+  refresh_expiry: process.env.REFRESH_EXPIRY,
   port:+process.env.PORT,
   smtp_host: process.env.PRODUCTION_SMTP_HOST,
   smtp_port: process.env.PRODUCTION_SMTP_PORT,
