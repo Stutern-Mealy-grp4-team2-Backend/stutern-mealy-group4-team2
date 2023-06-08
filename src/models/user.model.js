@@ -18,8 +18,11 @@ const UserSchema = new Schema({
     }
   },
   password: {
-    type: String,
-    required: true,
+  type: String,
+  required: function() {
+    // Make the password field required unless googleId or facebookId is present
+    return !(this.facebookId || this.googleId);
+  },
     select: false,
   },
   isVerified: {
@@ -38,3 +41,4 @@ const UserSchema = new Schema({
 
 
 export default model('User', UserSchema)
+

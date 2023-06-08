@@ -18,5 +18,8 @@ export const production = {
   from_name: process.env.PRODUCTION_FROM_NAME,
   google_client_ID: process.env.PRODUCTION_GOOGLE_CLIENT_ID,
   google_client_secret: process.env.PRODUCTION_GOOGLE_CLIENT_SECRET,
-  google_callback_url: process.env.PRODUCTION_GOOGLE_CALLBACK_URL
+  google_callback_url: process.env.PRODUCTION_GOOGLE_CALLBACK_URL,
+  facebook_app_id: process.env.FACEBOOK_APP_ID,
+  facebook_app_secret: process.env.FACEBOOK_APP_SECRET,
+  facebook_callback_url: process.env.FACEBOOK_CALLBACK_URL
 }
