@@ -111,7 +111,7 @@ export default class UserController {
       const refresh = refreshToken(user)
       user.refreshToken = refresh
       await user.save()
-      res.cookie("refresh_token",refresh,{httpOnly: true, maxAge:24*60*60*100})
+      res.cookie("refresh_token",refresh,{httpOnly: true, maxAge: config.cookie_max_age})
       res.status(200).json({
         status: "Success",
         message: "Login successful",
