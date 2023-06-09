@@ -1,4 +1,4 @@
-import { Schema, model }  from "mongoose";
+import { Schema, model, Types }  from "mongoose";
 
 const UserSchema = new Schema({
   name: {
@@ -42,6 +42,24 @@ const UserSchema = new Schema({
   resetPasswordExpire: Date,
   googleId: String,
   facebookId: String,
+  favoriteMeals: [{
+    type: Types.ObjectId,
+    ref: 'Meal'
+  }],
+  location: {
+    type: {
+      type: String,
+      default: 'Point'
+    },
+    coordinates: [Number]
+  },
+  favorites: [{
+    vendor: {
+      type: Schema.Types.ObjectId,
+      ref: 'Vendor',
+    },
+    category: String,
+  }],
 }, {
   timestamps: true
 });
