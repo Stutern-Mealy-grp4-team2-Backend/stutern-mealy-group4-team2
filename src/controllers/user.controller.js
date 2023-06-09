@@ -4,7 +4,7 @@ import User from "../models/user.model.js"
 import bcrypt from "bcrypt"
 import {config} from "../config/index.js"
 import { sendEmail } from "../utils/sendEmail.js"
-import { generateToken,refreshToken } from "../utils/jwt.utils.js"
+import { generateToken, refreshToken } from "../utils/jwt.utils.js"
 import crypto from "crypto";
 
 
@@ -117,7 +117,8 @@ export default class UserController {
         message: "Login successful",
         data: {
           user,
-          access_token: token
+          access_token: token,
+          refreshToken,
         }
       })
     }
@@ -130,7 +131,7 @@ export default class UserController {
       // Get reset token
       const resetPasswordToken = Math.floor(100000 + Math.random() * 900000).toString();
       // Get reset Expire
-      const resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+      const resetPasswordExpire = Date.now() + config.token_expiry;
       // Update user with reset token and expiration date
       user.resetPasswordToken = resetPasswordToken;
       user.resetPasswordExpire = resetPasswordExpire;
@@ -193,61 +194,6 @@ export default class UserController {
         data: user,
       });
     }
-      
-
-    static async findUser(req, res,) {
-      const { id } = req.query
-      const user = await User.findById(id)
-      if (!user) {
-        res.status(400).json({
-          status: "Failed",
-          message: "User not found"
-        })
-      }
-      res.status(200).json({
-      message: "User found successfully",
-      status: "Success",
-      data:{
-        user
-        }
-      })
-    }
-
-    static async guestUser(req, res,) {
-      res.status(200).json({
-      status: "Success",
-      message: "Log in successful",
-      })
-    }
-
-    static async deleteUser(req, res,) {
-      const { id } = req.params;
-      const user = await User.findByIdAndRemove(id)
-      if (!user) throw new NotFoundError('User Not Found')
-      res.status(200).json({
-      message: "User deleted successfully",
-      status: "Success",
-      })
-    }
-
-    static async findAll(req, res) {
-      const users =  await User.find()
-      if(users.length < 1) throw new NotFoundError('No user found')
-      res.status(200).json({
-        status: "Success",
-        data: users
-      })
-    }
-
-    static async deleteAll(req, res) {
-      const users =  await User.find()
-      if(users.length < 1) throw new NotFoundError('No user found')
-      const deleteUsers = await User.deleteMany()
-      res.status(200).json({
-        status: "All users delete successfully",
-      })
-    }
-
 
       //refresh token handler
   static async refresh (req,res){
@@ -282,16 +228,68 @@ export default class UserController {
     const foundUser = await User.findOne({refreshToken:refreshTokenCookie})
     if (!foundUser) {
       //clear the cookies the cookie though not found in the db
-      res.clearCookie("refresh_token",{httpOnly: true, maxAge:24*60*60*1000})
+      res.clearCookie("refresh_token",{httpOnly: true, maxAge: config.cookie_max_age})
       return res.sendStatus(204) //successful but not content
     }
     //delete the refresh token in the db
     foundUser.refreshToken = null
     await foundUser.save()
-    res.clearCookie("refresh_token",{httpOnly: true, maxAge: 24*60*60*1000})
+    res.clearCookie("refresh_token",{httpOnly: true, maxAge: config.cookie_max_age})
     res.send(201).json({message:"You have logged out"})
   }
     
+  static async findUser(req, res,) {
+    const { id } = req.query
+    const user = await User.findById(id)
+    if (!user) {
+      res.status(400).json({
+        status: "Failed",
+        message: "User not found"
+      })
+    }
+    res.status(200).json({
+    message: "User found successfully",
+    status: "Success",
+    data:{
+      user
+      }
+    })
+  }
+
+  static async guestUser(req, res,) {
+    res.status(200).json({
+    status: "Success",
+    message: "Log in successful",
+    })
+  }
+
+  static async deleteUser(req, res,) {
+    const { id } = req.params;
+    const user = await User.findByIdAndRemove(id)
+    if (!user) throw new NotFoundError('User Not Found')
+    res.status(200).json({
+    message: "User deleted successfully",
+    status: "Success",
+    })
+  }
+
+  static async findAll(req, res) {
+    const users =  await User.find()
+    if(users.length < 1) throw new NotFoundError('No user found')
+    res.status(200).json({
+      status: "Success",
+      data: users
+    })
+  }
+
+  static async deleteAll(req, res) {
+    const users =  await User.find()
+    if(users.length < 1) throw new NotFoundError('No user found')
+    const deleteUsers = await User.deleteMany()
+    res.status(200).json({
+      status: "All users delete successfully",
+    })
+  }
 }
 
 

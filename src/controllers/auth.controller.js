@@ -1,6 +1,6 @@
 import passport from 'passport';
 
-// import { generateToken } from "../utils/jwt.utils.js";
+import { generateToken, refreshToken } from "../utils/jwt.utils.js"
 
 export default class AuthController {
   static async googleAuth(req, res) {
@@ -12,46 +12,57 @@ export default class AuthController {
   }
 
   static async googleCallback(req, res) {
-    passport.authenticate('google', { session: false }, (err, user) => {
+    passport.authenticate('google', { session: false }, async (err, user) => {
       if (err || !user) {
         return res.status(400).json({
           status: 'Failed',
           message: 'Google authentication failed.',
         });
       }
+      // Generate access and refresh tokens
+      const token = generateToken(user);
+      const refresh = refreshToken(user);
+  
+      // Update the user's refresh token in the database
+      user.refreshToken = refresh;
+      await user.save();
+  
       res.status(200).json({
         status: 'Success',
-        message: `Logged in successfully`,
-        user
-      })
-      
-      // // Generate a JWT token for the authenticated user
-      // const token = generateToken(user)
-
-      // // Redirect the user to the desired URL with the token appended as a query parameter
-      // res.redirect(`http://localhost:5000/dashboard?token=${token}`);
+        message: 'Logged in successfully',
+        user,
+        access_token: token,
+        refreshToken: refresh,
+      });
+  
     })(req, res);
   }
   
   static async facebookCallback(req, res) {
-    passport.authenticate('facebook', { session: false }, (err, user) => {
+    passport.authenticate('facebook', { session: false }, async(err, user) => {
       if (err || !user) {
         return res.status(400).json({
           status: 'Failed',
           message: 'Facebook authentication failed.',
         });
       }
+      // Generate access and refresh tokens
+      const token = generateToken(user);
+      const refresh = refreshToken(user);
+  
+      // Update the user's refresh token in the database
+      user.refreshToken = refresh;
+      await user.save();
+  
       res.status(200).json({
         status: 'Success',
-        message: `Logged in successfully`,
-        user
-      })
+        message: 'Logged in successfully',
+        user,
+        access_token: token,
+        refreshToken: refresh,
+      });
+  
       
-      // // Generate a JWT token for the authenticated user
-      // const token = generateToken(user)
-
-      // // Redirect the user to the desired URL with the token appended as a query parameter
-      // res.redirect(`http://localhost:5000/dashboard?token=${token}`);
     })(req, res);
   }
 }
