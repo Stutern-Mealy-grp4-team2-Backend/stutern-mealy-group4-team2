@@ -268,7 +268,7 @@ export default class UserController {
     const user = await User.findByIdAndRemove(id)
     if (!user) throw new NotFoundError('User Not Found')
     res.status(200).json({
-    message: "User deleted successfully",
+    message: `${user.name} with ${user.email} deleted successfully`,
     status: "Success",
     })
   }
