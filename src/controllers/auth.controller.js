@@ -1,6 +1,6 @@
 import passport from 'passport';
 
-import { generateToken } from "../utils/jwt.utils.js";
+// import { generateToken } from "../utils/jwt.utils.js";
 
 export default class AuthController {
   static async googleAuth(req, res) {
@@ -8,7 +8,7 @@ export default class AuthController {
   }
 
   static async facebookAuth(req, res) {
-    passport.authenticate('facebook', { scope: ['email'] })(req, res);
+    passport.authenticate('facebook')(req, res);
   }
 
   static async googleCallback(req, res) {

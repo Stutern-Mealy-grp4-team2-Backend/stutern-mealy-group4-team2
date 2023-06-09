@@ -47,21 +47,27 @@ passport.use(
         clientSecret: config.facebook_app_secret,
         callbackURL: config.facebook_callback_url,
         profileFields: ['id', 'displayName', 'email'],
+        // state: true
       },
-      async (request, accessToken, refreshToken, profile, done) => {
-        console.log(profile)
-        const { email, displayName, id } = profile._json;
+     async ( accessToken, refreshToken, profile, done) => {
+        const id = profile.id;
+        const displayName = profile.displayName;
+        const email = profile.emails ? profile.emails[0].value : null;
+        
+        
+        console.log(id, displayName, email)
        // Check if user with facebookId exists
-       const existingUser = await User.findOne({ id });
+       const existingUser = await User.findOne({ facebookId: profile.id });
        if (existingUser) {
+        return done(null, existingUser);
          // Check if user with the same email already exists
-         const userWithEmail = await User.findOne({ email });
-         if (userWithEmail) {
-           // Link the Facebook account with the existing user account
-           userWithEmail.facebookId = id;
-           await userWithEmail.save();
-           return done(null, userWithEmail);
-         }
+        //  const userWithEmail = await User.findOne({ email });
+        //  if (userWithEmail) {
+        //    // Link the Facebook account with the existing user account
+        //    userWithEmail.facebookId = id;
+        //    await userWithEmail.save();
+        //    return done(null, userWithEmail);
+        //  }
       }
 
        // Create new user with facebookId
