@@ -4,7 +4,7 @@ import User from "../models/user.model.js"
 import bcrypt from "bcrypt"
 import {config} from "../config/index.js"
 import { sendEmail } from "../utils/sendEmail.js"
-import { generateToken } from "../utils/jwt.utils.js"
+import { generateToken,refreshToken } from "../utils/jwt.utils.js"
 import crypto from "crypto";
 
 
@@ -108,6 +108,10 @@ export default class UserController {
       const isMatch = bcrypt.compareSync(password, user.password)
       if(!isMatch) throw new UnAuthorizedError("Invalid login details")
       const token = generateToken(user)
+      const refresh = refreshToken(user)
+      user.refreshToken = refresh
+      await user.save()
+      res.cookie("refresh_token",refresh,{httpOnly: true, maxAge:24*60*60*100})
       res.status(200).json({
         status: "Success",
         message: "Login successful",
@@ -189,14 +193,7 @@ export default class UserController {
         data: user,
       });
     }
-        
-    static async userLogout(req, res,) {
       
-      res.status(200).json({
-      status: "Success",
-      message: "Log out successful"
-      })
-    }
 
     static async findUser(req, res,) {
       const { id } = req.query
@@ -255,8 +252,54 @@ export default class UserController {
         status: "All users delete successfully",
       })
     }
+
+
+      //refresh token handler
+  static async refresh (req,res){
+    //access cookie to cookies
+    const cookies = req.Cookies
+    //check if cookies exist
+    if(!cookies?.refresh_token) return res.status(401).json({
+      status:"Failed",
+      message:err.message
+    })
+    const refreshTokenCookie = cookies.refresh_token
+    //find from record the cookie user
+    const foundUser = await User.findOne({refreshToken:refreshTokenCookie})
+    if (!foundUser) return res.sendStatus(403)
+    jwt.verify(refreshTokenCookie,config.refresh_secret_key,(err,decoded) => {
+        if(err || foundUser._id !== decoded.payload._id) return res.status(403)
+        const token = generateToken(foundUser)
+        res.status(201).json(token)
+    })
+  }
+
+  //logout controller
+  static async logout (req,res){
+    //on the client delete the access token
+    //access cookie to cookies
+    const cookies = req.Cookies
+    //check if cookies exist
+    if(!cookies?.refresh_token) return res.sendStatus(204) //no content
+    //if there is a cookie in the req
+    const refreshTokenCookie = cookies.refresh_token
+    //find from db if there is refresh token
+    const foundUser = await User.findOne({refreshToken:refreshTokenCookie})
+    if (!foundUser) {
+      //clear the cookies the cookie though not found in the db
+      res.clearCookie("refresh_token",{httpOnly: true, maxAge:24*60*60*1000})
+      return res.sendStatus(204) //successful but not content
+    }
+    //delete the refresh token in the db
+    foundUser.refreshToken = null
+    await foundUser.save()
+    res.clearCookie("refresh_token",{httpOnly: true, maxAge: 24*60*60*1000})
+    res.send(201).json({message:"You have logged out"})
+  }
     
 }
+
+
 
     
 
