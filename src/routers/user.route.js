@@ -14,13 +14,13 @@ router.post("/resetpassword/code", tryCatchHandler( UserController.resetPassword
 router.put("/resetpassword/:resetPasswordToken", tryCatchHandler( UserController.resetPassword) )
 router.get("/", tryCatchHandler( UserController.findUser) )
 router.get("/users", tryCatchHandler( UserController.findAll) )
-router.delete("/deleteall", userAuthMiddleWare,tryCatchHandler( UserController.deleteAll) )
-router.delete("/deleteuser/:id",userAuthMiddleWare,tryCatchHandler( UserController.deleteUser) )
+router.delete("/deleteall", tryCatchHandler( UserController.deleteAll) )
+router.delete("/deleteuser/:id", tryCatchHandler( UserController.deleteUser) )
 router.get("/guestlogin", ( UserController.guestUser) )
-router.get("/logout",userAuthMiddleWare,tryCatchHandler( UserController.logout) )
-router.get("/refresh",userAuthMiddleWare,tryCatchHandler( UserController.refresh) )
-router.get("/profile",userAuthMiddleWare,tryCatchHandler(UserController.profile))
-router.put("/Profile/:userId",userAuthMiddleWare,tryCatchHandler(UserController.updateProfile))
+router.get("/logout", userAuthMiddleWare, tryCatchHandler( UserController.logout) )
+router.get("/refresh", userAuthMiddleWare, tryCatchHandler( UserController.refresh) )
+router.get("/profile", userAuthMiddleWare, tryCatchHandler(UserController.profile))
+router.put("/Profile/:userId", userAuthMiddleWare, tryCatchHandler(UserController.updateProfile))
 
 
 //Exporting the User Router
