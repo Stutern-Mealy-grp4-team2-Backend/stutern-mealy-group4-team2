@@ -224,14 +224,9 @@ export default class UserController {
     }
 
     static async deleteUser(req, res,) {
-      const { id } = req.params.id
+      const { id } = req.params;
       const user = await User.findByIdAndRemove(id)
-      if (!user) {
-        res.status(400).json({
-          status: "Failed",
-          message: "User not found"
-        })
-      }
+      if (!user) throw new NotFoundError('User Not Found')
       res.status(200).json({
       message: "User deleted successfully",
       status: "Success",

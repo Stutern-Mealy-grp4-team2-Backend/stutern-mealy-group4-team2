@@ -24,6 +24,16 @@ passport.use(
             return done(null, userWithEmail);
           }
         }
+        if (!existingUser) {
+          // Check if user with the same email already exists
+          const userWithEmail = await User.findOne({ email: profile.emails[0].value });
+          if (userWithEmail) {
+            // Link the Facebook account with the existing user account
+            userWithEmail.googleId = profile.id;
+            await userWithEmail.save();
+            return done(null, userWithEmail);
+          }
+        }
          
          // Create new user with googleId
          const user = new User({
