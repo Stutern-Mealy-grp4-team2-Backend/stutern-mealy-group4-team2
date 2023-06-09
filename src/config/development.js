@@ -16,6 +16,12 @@ export const development = {
   smtp_email: process.env.DEV_SMTP_EMAIL,
   smtp_password: process.env.DEV_SMTP_PASSWORD,
   from_email: process.env.DEV_FROM_EMAIL,
-  from_name: process.env.DEV_FROM_NAME
+  from_name: process.env.DEV_FROM_NAME,
+  google_client_ID: process.env.DEV_GOOGLE_CLIENT_ID,
+  google_client_secret: process.env.DEV_GOOGLE_CLIENT_SECRET,
+  google_callback_url: process.env.DEV_GOOGLE_CALLBACK_URL,
+  facebook_app_id: process.env.FACEBOOK_APP_ID,
+  facebook_app_secret: process.env.FACEBOOK_APP_SECRET,
+  facebook_callback_url: process.env.FACEBOOK_CALLBACK_URL
 
 }

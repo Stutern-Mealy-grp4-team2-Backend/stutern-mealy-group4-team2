@@ -9,7 +9,10 @@ const UserSchema = new Schema({
   },
   email: {
     type: String,
-    required: true,
+    required: function() {
+      // Make the password field required unless googleId or facebookId is present
+      return !(this.facebookId);
+    },
     unique: true,
     lowercase: true,
     immutable: true,
@@ -18,8 +21,11 @@ const UserSchema = new Schema({
     }
   },
   password: {
-    type: String,
-    required: true,
+  type: String,
+  required: function() {
+    // Make the password field required unless googleId or facebookId is present
+    return !(this.facebookId || this.googleId);
+  },
     select: false,
   },
   isVerified: {
@@ -34,9 +40,12 @@ const UserSchema = new Schema({
   verifyEmailTokenExpire: Date,
   resetPasswordToken: String,
   resetPasswordExpire: Date,
+  googleId: String,
+  facebookId: String,
 }, {
   timestamps: true
 });
 
 
 export default model('User', UserSchema)
+

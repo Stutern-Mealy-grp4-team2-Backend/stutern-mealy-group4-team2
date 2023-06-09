@@ -1,8 +1,14 @@
 import express  from "express";
+import  './src/config/passport.js';
+import passport from 'passport';
 import mongoose from "mongoose";
 import morgan from "morgan";
 import { router as userRouter } from "./src/routers/user.route.js"
+ victor
+import { router as authRouter } from "./src/routers/auth.route.js"
+
 import { router as productRouter } from "./src/routers/product.route.js"
+ staging
 import { globalErrorHandler } from "./src/utils/errorHandler.js"
 import { config } from "./src/config/index.js";
 import cookieParser from "cookie-parser";
@@ -13,6 +19,11 @@ const app = express()
 
 // Enable CORS for all routes
 app.use(cors());
+
+// Initialize Passport.js middleware
+app.use(passport.initialize());
+
+// Use the authentication routes
 
 
 // Database connection
@@ -28,6 +39,7 @@ app.use(express.json())
 
 
 // Routes 
+app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/user', userRouter)
 app.use('/api/v1/product', productRouter)
 
