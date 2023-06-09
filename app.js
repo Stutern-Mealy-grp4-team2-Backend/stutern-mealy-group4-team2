@@ -4,11 +4,11 @@ import passport from 'passport';
 import mongoose from "mongoose";
 import morgan from "morgan";
 import { router as userRouter } from "./src/routers/user.route.js"
- victor
+
 import { router as authRouter } from "./src/routers/auth.route.js"
 
 import { router as productRouter } from "./src/routers/product.route.js"
- staging
+ 
 import { globalErrorHandler } from "./src/utils/errorHandler.js"
 import { config } from "./src/config/index.js";
 import cookieParser from "cookie-parser";
