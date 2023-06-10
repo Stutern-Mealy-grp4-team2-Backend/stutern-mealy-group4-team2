@@ -42,10 +42,11 @@ const UserSchema = new Schema({
   resetPasswordExpire: Date,
   googleId: String,
   facebookId: String,
-  favoriteMeals: [{
+  favourites: [{
     type: Types.ObjectId,
-    ref: 'Meal'
+    ref: 'Product'
   }],
+  
   location: {
     type: {
       type: String,
@@ -53,16 +54,15 @@ const UserSchema = new Schema({
     },
     coordinates: [Number]
   },
-  favorites: [{
-    vendor: {
-      type: Schema.Types.ObjectId,
-      ref: 'Vendor',
-    },
-    category: String,
-  }],
+  orders: [{
+    type: Types.ObjectId,
+    ref: 'Order',
+}],
 }, {
   timestamps: true
 });
+
+UserSchema.index({ location: '2dsphere' });
 
 
 export default model('User', UserSchema)
