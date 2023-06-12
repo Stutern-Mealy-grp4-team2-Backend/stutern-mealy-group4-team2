@@ -191,19 +191,30 @@ export default class UserController {
       // validate new password
       const { error } = resetPasswordValidator.validate(req.body);
       if (error) throw error;
+      // Generate tokens
+      const token = generateToken(user)
+      const refresh = refreshToken(user)
       // Hash new password
       const saltRounds = config.bycrypt_salt_round;
       user.password = bcrypt.hashSync(req.body.password, saltRounds);
       user.resetPasswordToken = undefined;
       user.resetPasswordExpire = undefined;
+      user.refreshToken = refresh
       await user.save();
-  
+      const maxAge = parseInt(config.cookie_max_age);
+      res.cookie("refresh_token", refresh, { 
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge 
+    });
       res.status(200).json({
         status: "Success",
         message: "Password updated successfully",
         data: {
           name: user.name,
           email: user.email,
+          access_token: token
         },
       });
     }
