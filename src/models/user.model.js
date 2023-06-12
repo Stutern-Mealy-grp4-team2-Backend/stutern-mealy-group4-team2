@@ -42,6 +42,10 @@ const UserSchema = new Schema({
   resetPasswordExpire: Date,
   googleId: String,
   facebookId: String,
+  receivePromotionalEmails: {
+    type: Boolean,
+    default: false,
+  },
 }, {
   timestamps: true
 });
