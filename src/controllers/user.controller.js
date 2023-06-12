@@ -87,19 +87,18 @@ export default class UserController {
       res.status(201).json({
       status: "Success",
       message: 'Account activated successfully. You can now login.',
-      data:{
-        user,
-        }
+      data: {
+        name: user.name,
+        email: user.email,
+      },
       })
     }
 
     static async loginUser(req, res) {
       const { error } = loginUserValidator.validate(req.body)
-      if (error) throw error
+      if (error) throw new BadUserRequestError("Invalid login details");
       const { email, password } = req.body;
-      //if (!email && !password) throw new BadUserRequestError("Please provide a username and email before you can login.")
       const user = await User.findOne({ email }).select('+password')
-      //if(!user.isVerified) throw new UnAuthorizedError ('Please verify your account')
       if(!user) throw new UnAuthorizedError("Invalid login details")
       if (!user.isVerified) {
         throw new UnAuthorizedError(`Please login to ${user.email} to activate your account before logging in.`);
@@ -109,16 +108,26 @@ export default class UserController {
       if(!isMatch) throw new UnAuthorizedError("Invalid login details")
       const token = generateToken(user)
       const refresh = refreshToken(user)
+      // console.log(refresh)
       user.refreshToken = refresh
       await user.save()
-      res.cookie("refresh_token",refresh,{httpOnly: true, maxAge: config.cookie_max_age})
+      const maxAge = parseInt(config.cookie_max_age);
+      res.cookie("refresh_token", refresh, { 
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge 
+    });
+
       res.status(200).json({
         status: "Success",
         message: "Login successful",
         data: {
-          user,
+          user: {
+            name: user.name,
+            email: user.email,
+          },
           access_token: token,
-          refreshToken,
         }
       })
     }
@@ -157,12 +166,10 @@ export default class UserController {
     // Verify the Reset password code  
     static async resetPasswordCode(req, res) {
       const { resetPasswordToken } = req.body;
-      console.log(resetPasswordToken)
       const user = await User.findOne({
         resetPasswordToken,
         resetPasswordExpire: { $gt: Date.now() },
       });
-      console.log(user)
       if (!user) throw new UnAuthorizedError("Invalid or expired reset password token");
       res.status(200).json({
         status: "Success",
@@ -172,7 +179,6 @@ export default class UserController {
     // Update the Password
     static async resetPassword(req, res) {
       const  resetPasswordToken  = req.params.resetPasswordToken;
-      console.log(resetPasswordToken)
       const user = await User.findOne({
         resetPasswordToken,
         resetPasswordExpire: { $gt: Date.now() },
@@ -191,7 +197,10 @@ export default class UserController {
       res.status(200).json({
         status: "Success",
         message: "Password updated successfully",
-        data: user,
+        data: {
+          name: user.name,
+          email: user.email,
+        },
       });
     }
 
@@ -219,27 +228,30 @@ export default class UserController {
   static async logout (req,res){
     //on the client delete the access token
     //access cookie to cookies
-    const cookies = req.Cookies
+    const cookies = req.cookies;
     //check if cookies exist
     if(!cookies?.refresh_token) return res.sendStatus(204) //no content
     //if there is a cookie in the req
     const refreshTokenCookie = cookies.refresh_token
     //find from db if there is refresh token
     const foundUser = await User.findOne({refreshToken:refreshTokenCookie})
-    if (!foundUser) {
-      //clear the cookies the cookie though not found in the db
-      res.clearCookie("refresh_token",{httpOnly: true, maxAge: config.cookie_max_age})
+    if(!foundUser) {
+    //clear the cookies the cookie though not found in the db
+    res.clearCookie("refresh_token",{httpOnly: true, maxAge: config.cookie_max_age})
       return res.sendStatus(204) //successful but not content
     }
     //delete the refresh token in the db
     foundUser.refreshToken = null
     await foundUser.save()
     res.clearCookie("refresh_token",{httpOnly: true, maxAge: config.cookie_max_age})
-    res.send(201).json({message:"You have logged out"})
+    res.status(200).json({
+    status: 'status',
+    message:"Logout successful"
+  })
   }
     
-  static async findUser(req, res,) {
-    const { id } = req.query
+  static async findDevUser(req, res) {
+    const { id } = req.params;
     const user = await User.findById(id)
     if (!user) {
       res.status(400).json({
@@ -256,14 +268,28 @@ export default class UserController {
     })
   }
 
-  static async guestUser(req, res,) {
+  static async findUser(req, res) {
+    const { email } = req.params;
+    const user = await User.findOne({ email })
+    if (!user) throw new NotFoundError('User not found')
+    res.status(200).json({
+    status: "Success",
+    message: "User found",
+    
+    data:{
+      user
+      }
+    })
+  }
+
+  static async guestUser(req, res) {
     res.status(200).json({
     status: "Success",
     message: "Log in successful",
     })
   }
 
-  static async deleteUser(req, res,) {
+  static async deleteDevUser(req, res) {
     const { id } = req.params;
     const user = await User.findByIdAndRemove(id)
     if (!user) throw new NotFoundError('User Not Found')
@@ -274,13 +300,25 @@ export default class UserController {
   }
 
   static async findAll(req, res) {
-    const users =  await User.find()
+    const users =  await User.find({}, 'name email -_id')
     if(users.length < 1) throw new NotFoundError('No user found')
     res.status(200).json({
       status: "Success",
       data: users
     })
   }
+
+  static async deleteUser(req, res) {
+    const { email } = req.params;
+    const user = await User.findOneAndRemove({ email });
+    if (!user) throw new NotFoundError('User Not Found')
+    res.status(200).json({
+    message: `${user.name} with ${user.email} deleted successfully`,
+    status: "Success",
+    })
+  }
+  
+ 
 
   static async deleteAll(req, res) {
     const users =  await User.find()

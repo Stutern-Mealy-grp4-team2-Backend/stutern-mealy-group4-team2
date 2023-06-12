@@ -1,5 +1,5 @@
 import passport from 'passport';
-
+import { config } from "../config/index.js"
 import { generateToken, refreshToken } from "../utils/jwt.utils.js"
 
 export default class AuthController {
@@ -22,17 +22,24 @@ export default class AuthController {
       // Generate access and refresh tokens
       const token = generateToken(user);
       const refresh = refreshToken(user);
-  
       // Update the user's refresh token in the database
       user.refreshToken = refresh;
       await user.save();
-  
+      const maxAge = parseInt(config.cookie_max_age);
+      res.cookie("refresh_token", refresh, { 
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge 
+    });
       res.status(200).json({
         status: 'Success',
-        message: 'Logged in successfully',
-        user,
+        message: 'Login successful',
+        user: {
+          name: user.name,
+          email: user.email,
+        },
         access_token: token,
-        refreshToken: refresh,
       });
   
     })(req, res);
@@ -49,20 +56,25 @@ export default class AuthController {
       // Generate access and refresh tokens
       const token = generateToken(user);
       const refresh = refreshToken(user);
-  
       // Update the user's refresh token in the database
       user.refreshToken = refresh;
       await user.save();
-  
+      const maxAge = parseInt(config.cookie_max_age);
+      res.cookie("refresh_token", refresh, { 
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge 
+    });
       res.status(200).json({
         status: 'Success',
-        message: 'Logged in successfully',
-        user,
+        message: 'Login successful',
+        user: {
+          name: user.name,
+          email: user.email,
+        },
         access_token: token,
-        refreshToken: refresh,
-      });
-  
-      
+      });      
     })(req, res);
   }
 }
