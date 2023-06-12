@@ -16,7 +16,7 @@ export default class UserController {
       // Joi validation
       const {error} = createUserValidator.validate(req.body)
       if (error) throw error
-      const { name, email, password } = req.body;
+      const { name, email, password, receivePromotionalEmails } = req.body;
       // Confirm  email has not been used by another user
       const existingUser = await User.findOne({ email });
       if (existingUser) {
