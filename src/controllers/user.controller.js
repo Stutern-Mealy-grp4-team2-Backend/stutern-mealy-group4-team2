@@ -42,6 +42,7 @@ export default class UserController {
       name,
       email,
       password: hashedPassword,
+      receivePromotionalEmails,
       verifyEmailToken,
       verifyEmailTokenExpire: Date.now() + config.token_expiry,
       });
