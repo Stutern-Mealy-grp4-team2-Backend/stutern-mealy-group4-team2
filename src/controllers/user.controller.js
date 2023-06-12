@@ -34,12 +34,7 @@ export default class UserController {
       // Generate verification token
       const saltRounds = config.bycrypt_salt_round
       // Create verification token
-      const token = crypto.randomBytes(20).toString('hex');
-      // Hash verification token
-      const verifyEmailToken = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+      const verifyEmailToken = Math.floor(100000 + Math.random() * 900000).toString();
       // Hash password
       const hashedPassword = bcrypt.hashSync(password, saltRounds);
      
@@ -52,10 +47,8 @@ export default class UserController {
       });
       
      await user.save()
-      // create verification email URL
-      const verifyEmailUrl = `${req.protocol}://${req.get('host')}/api/v1/user/verify/${verifyEmailToken}`;
        // Set body of email
-      const message = `Hi ${name}, please click on the following link to activate your account: ${verifyEmailUrl}`
+      const message = `Hi ${name}, Your verification code is: ${verifyEmailToken}`
       
       const mailSent = await sendEmail({
           email: user.email,
@@ -72,7 +65,7 @@ export default class UserController {
     
     static async verifyUser(req, res) {
       // Extract verification token
-      const verifyEmailToken = req.params.verifyEmailToken;      
+      const verifyEmailToken = req.body.verifyEmailToken;
       // Find the user by the verification token
       const user = await User.findOne({
         verifyEmailToken,
@@ -84,12 +77,25 @@ export default class UserController {
       user.verifyEmailToken = undefined;
       user.verifyEmailTokenExpire = undefined;
       await user.save();
+      const token = generateToken(user)
+      const refresh = refreshToken(user)
+      // console.log(refresh)
+      user.refreshToken = refresh
+      await user.save()
+      const maxAge = parseInt(config.cookie_max_age);
+      res.cookie("refresh_token", refresh, { 
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge 
+    });
       res.status(201).json({
       status: "Success",
-      message: 'Account activated successfully. You can now login.',
+      message: 'Account activated successfully.',
       data: {
         name: user.name,
         email: user.email,
+        access_token: token,
       },
       })
     }
@@ -145,8 +151,6 @@ export default class UserController {
       user.resetPasswordToken = resetPasswordToken;
       user.resetPasswordExpire = resetPasswordExpire;
       await user.save();
-      // create reset URL
-      //const resetUrl = `Helloe ${user.name}, Your verification code is: ${resetPasswordToken}`;
 
       const message = `Hello ${user.name}, Your verification code is: ${resetPasswordToken}`
       
