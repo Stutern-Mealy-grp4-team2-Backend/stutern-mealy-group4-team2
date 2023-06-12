@@ -7,7 +7,7 @@ import { userAuthMiddleWare } from "../middlewares/auth.middleware.js";
 const router = Router()
 // Setting up the User signup/login routes
 router.post("/signup", tryCatchHandler(UserController.createUser));
-router.get('/verify/:verifyEmailToken', tryCatchHandler(UserController.verifyUser));
+router.post('/verify/', tryCatchHandler(UserController.verifyUser));
 router.post("/signin", tryCatchHandler(UserController.loginUser));
 router.post("/forgotpassword", tryCatchHandler(UserController.forgotPassword));
 router.post("/resetpassword/code", tryCatchHandler(UserController.resetPasswordCode));
