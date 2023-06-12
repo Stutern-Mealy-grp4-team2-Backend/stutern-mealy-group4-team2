@@ -5,7 +5,6 @@ import bcrypt from "bcrypt"
 import {config} from "../config/index.js"
 import { sendEmail } from "../utils/sendEmail.js"
 import { generateToken, refreshToken } from "../utils/jwt.utils.js"
-import crypto from "crypto";
 
 
 
