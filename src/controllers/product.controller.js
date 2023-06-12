@@ -1,24 +1,31 @@
 import Product from "../models/product.model.js"
 import Vendor from "../models/vendor.model.js"
-import { UnAuthorizedError, BadUserRequestError } from "../errors/error.js"
+import { UnAuthorizedError, BadUserRequestError, NotFoundError } from "../errors/error.js"
 import {Types} from "mongoose";
 
 export default class ProductController {
     static async createProduct (req,res) {
         const id = req.body.vendor_id;
         if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid vendor ID')
-        // const existingVendor = await Vendor.findById(id)
-        // if(!existingVendor) throw new BadUserRequestError('Please pass a valid vendor ID')
         const { category } = req.body;
         if(!Product.schema.path('category').enumValues.includes(category)) throw new BadUserRequestError('Please provide a valid category');
         const product = await Product.create(req.body)
+        res.status(201).json({
+        status: "Success",
+       data: product,
+      })
+      }
+            
+    static async getProduct (req,res) {
+      const id = req.query.product_id;
+      if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid vendor ID')
+      const product = await Product.findById()
+      if(!product) throw new NotFoundError('Product not available');
       res.status(201).json({
       status: "Success",
       data: product,
     })
-    }
-            
-            
+    }     
 }
 
 
