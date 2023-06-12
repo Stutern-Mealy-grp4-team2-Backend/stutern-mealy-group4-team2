@@ -4,7 +4,7 @@ import { UnAuthorizedError, BadUserRequestError, NotFoundError } from "../errors
 import {Types} from "mongoose";
 
 export default class ProductController {
-    static async createProduct (req,res) {
+    static async createProduct (req, res) {
         const id = req.body.vendor_id;
         if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid vendor ID')
         const { category } = req.body;
@@ -14,18 +14,27 @@ export default class ProductController {
         status: "Success",
        data: product,
       })
-      }
+    }
             
-    static async getProduct (req,res) {
+    static async getSingleProduct (req, res) {
       const id = req.query.product_id;
       if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid vendor ID')
-      const product = await Product.findById()
+      const product = await Product.findById(id)
       if(!product) throw new NotFoundError('Product not available');
       res.status(201).json({
       status: "Success",
       data: product,
-    })
-    }     
+      })
+    }
+    
+    static async getAllProducts (req, res) {
+      const products = await Product.find()
+      if(products.length < 1) throw new NotFoundError('No Product available');
+      res.status(201).json({
+      status: "Success",
+      data: products,
+      })
+    }
 }
 
 

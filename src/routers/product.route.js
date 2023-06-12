@@ -6,20 +6,11 @@ import { tryCatchHandler } from '../utils/tryCatch.handler.js'
 const router = Router()
 
 router.post("/create", tryCatchHandler(ProductController.createProduct) )
-router.get("/", tryCatchHandler(ProductController.getSingleProduct) )
 router.get("/search", tryCatchHandler(ProductController.SearchVendor) )
-
+router.get("/", tryCatchHandler(ProductController.getSingleProduct) )
 
 
 export { router }
-
-
-
-
-
-
-
-
 
 
 
