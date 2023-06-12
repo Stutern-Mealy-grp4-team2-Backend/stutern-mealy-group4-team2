@@ -1,10 +1,9 @@
-import { Schema, model, Types }  from "mongoose";
+import { Schema, model, Types, Query }  from "mongoose";
 
 const ProductSchema = new Schema({
     name: {
         type: String,
-        min: [3, 'Name must be at least 3 characters'],
-        max: [3, 'Name must not be more than 10 characters'],
+        min: [2, 'Name must be at least 2 characters long'],
         required: [true, 'Please add a name']
     },
     price: {
@@ -14,6 +13,13 @@ const ProductSchema = new Schema({
     },
     description: {
         type: String,
+        validate: {
+            validator: function(value) {
+              const words = value.split(' ');
+              return words.length >= 3;
+            },
+            message: 'description should have at least 3 words'
+          },
         required: [true, 'Please add a description']
     },
     rating: {
@@ -25,12 +31,27 @@ const ProductSchema = new Schema({
         type: String,
         default: 'no-photo.jpg'
     },
-    category: {
+    vendor: {
         type: Types.ObjectId,
-        ref: 'Category',
-        required: true
+        ref: 'Vendor',
+        // required: true
     },
-    ingredients: [String],
+    category: {
+        type: String,
+        enum: ['African', 'Drinks', 'Salad', 'Combo', 'Starters', 'Snacks'],
+        required: [true, 'Please add a valid category']
+    },
+    ingredients:{
+        type: String,
+        validate: {
+          validator: function(value) {
+            const words = value.split(' ');
+            return words.length >= 3;
+          },
+          message: 'Please provide at least 3 ingredients'
+        },
+        
+    },
     size: String,
     calories: String,
     cookTime: String,

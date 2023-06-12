@@ -1,11 +1,9 @@
-import { Schema, model, Types }  from "mongoose";
+import { Schema, model, Query }  from "mongoose";
 
 const CategorySchema = new Schema({
     name: {
         type: String,
-        min: [3, 'Name must be at least 3 characters'],
-        max: [3, 'Name must not be more than 10 characters'],
-        required: [true, 'Please add a name']
+        enum: ['African', 'Drinks', 'Salad', 'Combo', 'Starters', 'Snacks'],
     },
     isDeleted: {
         type: Boolean,
