@@ -16,7 +16,7 @@ export default class ProductController {
       })
     }
             
-    static async getSingleProduct (req, res) {
+    static async searchProduct (req, res) {
       const id = req.query.product_id;
       if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid vendor ID')
       const product = await Product.findById(id)
@@ -35,6 +35,19 @@ export default class ProductController {
       data: products,
       })
     }
+
+    static async searchProductsByCategory(req, res) {
+      const { category } = req.query;
+      const products = await Product.find({ category });
+      if (products.length < 1) {
+        throw new NotFoundError("No products available in the specified category");
+      }
+      res.status(200).json({
+        status: "Success",
+        data: products,
+      });
+    }
+  
 }
 
 

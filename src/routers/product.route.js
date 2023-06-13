@@ -6,8 +6,9 @@ import { tryCatchHandler } from '../utils/tryCatch.handler.js'
 const router = Router()
 
 router.post("/create", tryCatchHandler(ProductController.createProduct) )
-router.get("/search", tryCatchHandler(ProductController.SearchVendor) )
-router.get("/", tryCatchHandler(ProductController.getSingleProduct) )
+router.get("/all", tryCatchHandler(ProductController.getAllProducts) )
+router.get("/", tryCatchHandler(ProductController.searchProduct) )
+router.get("/category", tryCatchHandler(ProductController.searchProductsByCategory) )
 
 
 export { router }
