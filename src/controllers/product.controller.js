@@ -5,7 +5,7 @@ import {Types} from "mongoose";
 
 export default class ProductController {
     static async createProduct (req, res) {
-        const id = req.body.vendor_id;
+        const id = req.body.vendor
         if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid vendor ID')
         const { category } = req.body;
         if(!Product.schema.path('category').enumValues.includes(category)) throw new BadUserRequestError('Please provide a valid category');
