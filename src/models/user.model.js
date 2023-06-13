@@ -1,4 +1,4 @@
-import { Schema, model }  from "mongoose";
+import { Schema, model, Types }  from "mongoose";
 
 const UserSchema = new Schema({
   name: {
@@ -46,9 +46,27 @@ const UserSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  favourites: [{
+    type: Types.ObjectId,
+    ref: 'Product'
+  }],
+  
+  location: {
+    type: {
+      type: String,
+      default: 'Point'
+    },
+    coordinates: [Number]
+  },
+  orders: [{
+    type: Types.ObjectId,
+    ref: 'Order',
+}],
 }, {
   timestamps: true
 });
+
+UserSchema.index({ location: '2dsphere' });
 
 
 export default model('User', UserSchema)
