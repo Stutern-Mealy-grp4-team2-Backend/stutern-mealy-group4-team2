@@ -4,7 +4,9 @@ const ReviewSchema = new Schema({
     user: [{
         type: Types.ObjectId,
         ref: 'User',
+        required: true
     }],
+    userId: String,
     text: {
         type: String,
         required: [true, 'Please add some texts'],
@@ -20,6 +22,7 @@ const ReviewSchema = new Schema({
     product: [{
         type: Types.ObjectId,
         ref: 'Product',
+        required: true
     }],
 
     isDeleted: {
@@ -30,6 +33,8 @@ const ReviewSchema = new Schema({
 }, {
     timestamps: true
 })
+// Prevents users from submitting more than one review per product
+ReviewSchema.index({ product: 1, user: 1 }, { unique: true })
 
 ReviewSchema.pre(/^find/, function (next){
     if (this instanceof Query) {
