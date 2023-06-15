@@ -1,15 +1,18 @@
 import Product from "../models/product.model.js"
+
 import Review from "../models/review.model.js"
 import { UnAuthorizedError, BadUserRequestError, NotFoundError } from "../errors/error.js"
 import {Types} from "mongoose";
 
 export default class ReviewController {
     static async createReview (req, res) {
-        const { product, user} = req.body;
-        req.params.productId = product;
-        const availableProduct = await Product.findById({product})
+        //const { product } = req.body;
+        const product = req.params.productId = req.body.product;
+        const user = req.user;
+        if (!Types.ObjectId.isValid(product)) throw new BadUserRequestError('Please pass a valid product ID')
+        const availableProduct = await Product.findById(product)
         if(!availableProduct) throw new BadUserRequestError('Please pass a valid product ID'); 
-        const review = await Review.create(req.body)
+        const review = await Review.create({user, ...req.body})
         res.status(201).json({
         status: "Success",
         data: review,
@@ -21,7 +24,7 @@ export default class ReviewController {
       if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid product ID')
       const review = await Review.findById({product: id})
       if(!review) throw new NotFoundError(`No review found for product with id of ${id}`);
-      res.status(201).json({
+      res.status(200).json({
       status: "Success",
       data: review,
       })
@@ -30,34 +33,35 @@ export default class ReviewController {
     static async getProductReviews (req, res) {
       const id = req.params.productId;
       if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid product ID')
-      const reviews = await Review.find({product: id})
+      const reviews = await Review.find({ product: id })
       if(reviews.length < 1) throw new NotFoundError(`No review found for product with id of ${id}`);
-      res.status(201).json({
+      res.status(200).json({
       status: "Success",
       message: `${reviews.length} reviews available`,
       data: reviews,
       })
     }
     
-    static async getAllProducts (req, res) {
-      const products = await Product.find()
-      if(products.length < 1) throw new NotFoundError('No Product available');
-      res.status(201).json({
-      status: "Success",
-      data: products,
+    static async deleteReview (req, res) {
+        const id = req.params.reviewId;
+        if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid review ID')
+        const review = await Review.findByIdAndRemove(id)
+        if(!review) throw new NotFoundError(`Review with Id ${ id } not found`)
+        res.status(200).json({
+        status: "Success",
+        message: `Review with Id ${ id } deleted successfully`
       })
     }
 
-    static async searchProductsByCategory(req, res) {
-      const { category } = req.query;
-      const products = await Product.find({ category });
-      if (products.length < 1) {
-        throw new NotFoundError("No products available in the specified category");
-      }
+    static async deleteReviews (req, res) {
+      const id = req.params.productId;
+      if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid review ID')
+      const reviews = await Review.find({product: id})
+      if(reviews.length < 1) throw new NotFoundError(`No reviews found`)
+      const deletedReviews = await Review.deleteMany({product: id})
       res.status(200).json({
-        status: "Success",
-        data: products,
-      });
-    }
-  
+      status: "Success",
+      message: `Reviews deleted successfully`
+    })
+  }
 }

@@ -21,7 +21,7 @@ export default class ProductController {
       if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid ID')
       const product = await Product.findById(id)
       if(!product) throw new NotFoundError('Product not available');
-      res.status(201).json({
+      res.status(200).json({
       status: "Success",
       data: product,
       })
@@ -30,7 +30,7 @@ export default class ProductController {
     static async getAllProducts (req, res) {
       const products = await Product.find()
       if(products.length < 1) throw new NotFoundError('No Product available');
-      res.status(201).json({
+      res.status(200).json({
       status: "Success",
       message: `${products.length} products available`,
       data: products,

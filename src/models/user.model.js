@@ -42,22 +42,22 @@ const UserSchema = new Schema({
   resetPasswordExpire: Date,
   googleId: String,
   facebookId: String,
-  favourites: [{
-    type: Types.ObjectId,
-    ref: 'Product'
-  }],
+//   favourites: [{
+//     type: Types.ObjectId,
+//     ref: 'Product'
+//   }],
   
-  location: {
-    type: {
-      type: String,
-      default: 'Point'
-    },
-    coordinates: [Number]
-  },
-  orders: [{
-    type: Types.ObjectId,
-    ref: 'Order',
-}],
+//   location: {
+//     type: {
+//       type: String,
+//       default: 'Point'
+//     },
+//     coordinates: [Number]
+//   },
+//   orders: [{
+//     type: Types.ObjectId,
+//     ref: 'Order',
+// }],
 }, {
   timestamps: true
 });
