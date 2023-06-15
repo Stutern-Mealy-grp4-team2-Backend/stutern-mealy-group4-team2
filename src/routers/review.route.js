@@ -9,9 +9,11 @@ const router = Router()
 router.post("/product/create/:productId", userAuthMiddleWare, tryCatchHandler(ReviewController.createReview) )
 router.get("/product/all/:productId", tryCatchHandler(ReviewController.getProductReviews) )
 router.get("/product/:productId", tryCatchHandler(ReviewController.getProductReview) )
+router.delete("/product/:reviewId", userAuthMiddleWare, tryCatchHandler(ReviewController.deleteReview) )
+
 router.delete("/product/:productId", userAuthMiddleWare, tryCatchHandler(ReviewController.deleteReviews) )
 
-router.delete("/product/:reviewId", userAuthMiddleWare, tryCatchHandler(ReviewController.deleteReview) )
+router.put("/product/:reviewId", userAuthMiddleWare, tryCatchHandler(ReviewController.updateReview) )
 
 
 export { router }

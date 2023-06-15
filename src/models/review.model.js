@@ -36,6 +36,34 @@ const ReviewSchema = new Schema({
 // Prevents users from submitting more than one review per product
 ReviewSchema.index({ user: 1, product: 1 }, { unique: true })
 
+ReviewSchema.statics.getAverageRating = async function (productId) {
+    const obj = await this.aggregate([
+        {
+            $match: { product: productId }
+        },
+        {
+            $group: {
+                _id: '$product',
+                rating: { $avg: '$rating' }
+            }
+        }
+    ]);
+
+    
+    await this.model('Product').findByIdAndUpdate(productId, {
+         rating: obj[0].rating
+    })
+
+}
+
+ReviewSchema.post('save', function() {
+    this.constructor.getAverageRating(this.product);
+});
+
+ReviewSchema.pre('remove', function() {
+    this.constructor.getAverageRating(this.product);
+});
+
 ReviewSchema.pre(/^find/, function (next){
     if (this instanceof Query) {
         this.where({ isDeleted: { $ne: true } }); 

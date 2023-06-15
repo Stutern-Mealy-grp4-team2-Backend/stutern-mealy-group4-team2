@@ -42,11 +42,29 @@ export default class ReviewController {
       })
     }
     
+    static async updateReview (req, res) {
+      const id = req.params.reviewId;
+      if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid review ID')
+      const review = await Review.findById(id)
+      if(!review) throw new NotFoundError(`Review with Id ${ id } not found`)
+      if(review.user.toString() !== req.user._id) throw new UnAuthorizedError('Not authorized to delete this review')
+      const {text, rating} = req.body;
+      review.text = text;
+      review.rating = rating;
+      await review.save()
+      res.status(200).json({
+      status: "Success",
+      message: `Review with Id ${ id } updated successfully`,
+      review,
+    })
+  }
+
     static async deleteReview (req, res) {
         const id = req.params.reviewId;
         if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid review ID')
         const review = await Review.findByIdAndRemove(id)
         if(!review) throw new NotFoundError(`Review with Id ${ id } not found`)
+        if(review.user.toString() !== req.user._id) throw new UnAuthorizedError('Not authorized to delete this review')
         res.status(200).json({
         status: "Success",
         message: `Review with Id ${ id } deleted successfully`
