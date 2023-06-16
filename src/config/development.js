@@ -7,6 +7,7 @@ export const development = {
   bycrypt_salt_round: +process.env.DEV_BCRYPT_SALT_ROUND,
   jwt_secret_key: process.env.DEV_JWT_SECRET,
   refresh_secret_key: process.env.REFRESH_SECRET_KEY,
+  stripe_secret_keys:process.env.STRIPE_SECRET_KEYS,
   port: +process.env.PORT,
   jwt_expiry: process.env.DEV_JWT_EXPIRY,
   refresh_expiry: process.env.REFRESH_EXPIRY,

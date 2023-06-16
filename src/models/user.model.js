@@ -30,6 +30,25 @@ const UserSchema = new Schema({
     type:String,
     default:null
   },
+  cart:{
+    items:[
+      {
+          productId:{
+              type: mongoose.Schema.Types.ObjectId,
+              ref:"Product"
+          },
+          quantity:{
+              type: Number,
+              default:0
+          }
+      },
+     ],
+     totalPrice:{
+      type:Number,
+      required: true,
+      default:0
+    }
+  },
   verifyEmailToken: String,
   verifyEmailTokenExpire: Date,
   resetPasswordToken: String,
@@ -37,6 +56,24 @@ const UserSchema = new Schema({
 }, {
   timestamps: true
 });
+
+UserSchema.methods.addToCart =  function(product){
+  let cart = this.cart
+  if(cart.items.length == 0){
+    cart.items.push({productId:product._id, quantity:1})
+    cart.totalPrice = product.price
+  }else{
+    const isExisting =  cart.item.findIndex(objectId => objectId.productId == product._id)
+    if(isExisting == -1){//if the product does not exist
+      cart.items.push({productId:product._id,quantity:1})
+      cart.totalPrice += product.price
+    }else{
+      const existingProductInCart = cart.items[isExisting]
+      existingProductInCart.quantity += 1
+      cart.totalPrice  += product.price
+    }
+  }
+}
 
 
 export default model('User', UserSchema)

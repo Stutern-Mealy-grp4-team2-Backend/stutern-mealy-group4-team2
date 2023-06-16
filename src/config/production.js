@@ -10,6 +10,7 @@ export const production = {
   jwt_expiry: process.env.PRODUCTION_JWT_EXPIRY,
   token_expiry: +process.env.PRODUCTION_TOKEN_EXPIRY,
   refresh_secret_key: process.env.REFRESH_SECRET_KEY,
+  stripe_secret_keys:process.env.STRIPE_SECRET_KEYS,
   refresh_expiry: process.env.REFRESH_EXPIRY,
   port:+process.env.PORT,
   smtp_host: process.env.PRODUCTION_SMTP_HOST,
