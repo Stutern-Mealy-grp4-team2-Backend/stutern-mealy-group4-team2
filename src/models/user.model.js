@@ -1,4 +1,4 @@
-import { Schema, model }  from "mongoose";
+import { Schema, model, Types }  from "mongoose";
 
 const UserSchema = new Schema({
   name: {
@@ -9,7 +9,10 @@ const UserSchema = new Schema({
   },
   email: {
     type: String,
-    required: true,
+    required: function() {
+      // Make the password field required unless googleId or facebookId is present
+      return !(this.facebookId);
+    },
     unique: true,
     lowercase: true,
     immutable: true,
@@ -18,8 +21,11 @@ const UserSchema = new Schema({
     }
   },
   password: {
-    type: String,
-    required: true,
+  type: String,
+  required: function() {
+    // Make the password field required unless googleId or facebookId is present
+    return !(this.facebookId || this.googleId);
+  },
     select: false,
   },
   isVerified: {
@@ -53,6 +59,28 @@ const UserSchema = new Schema({
   verifyEmailTokenExpire: Date,
   resetPasswordToken: String,
   resetPasswordExpire: Date,
+  googleId: String,
+  facebookId: String,
+  receivePromotionalEmails: {
+    type: Boolean,
+    default: false,
+  },
+//   favourites: [{
+//     type: Types.ObjectId,
+//     ref: 'Product'
+//   }],
+  
+//   location: {
+//     type: {
+//       type: String,
+//       default: 'Point'
+//     },
+//     coordinates: [Number]
+//   },
+//   orders: [{
+//     type: Types.ObjectId,
+//     ref: 'Order',
+// }],
 }, {
   timestamps: true
 });
@@ -75,5 +103,9 @@ UserSchema.methods.addToCart =  function(product){
   }
 }
 
+UserSchema.index({ location: '2dsphere' });
+
 
 export default model('User', UserSchema)
+
+

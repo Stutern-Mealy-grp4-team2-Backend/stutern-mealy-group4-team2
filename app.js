@@ -1,11 +1,24 @@
 import express  from "express";
+import  './src/config/passport.js';
+import passport from 'passport';
 import mongoose from "mongoose";
 import morgan from "morgan";
 import { router as userRouter } from "./src/routers/user.route.js"
+
+import { router as vendorRouter } from "./src/routers/vendor.route.js"
+
+
+import { router as authRouter } from "./src/routers/auth.route.js"
+
 import { router as productRouter } from "./src/routers/product.route.js"
+<<<<<<< HEAD
 import { router as orderRouter } from "./src/routers/order.route.js"
 import { router as cartRouter } from "./src/routers/cart.route.js"
 import { router as stripeCheckoutRouter } from "./src/controllers/payment.controller.js"
+=======
+ 
+
+>>>>>>> staging
 import { globalErrorHandler } from "./src/utils/errorHandler.js"
 import { config } from "./src/config/index.js";
 import cookieParser from "cookie-parser";
@@ -16,6 +29,11 @@ const app = express()
 
 // Enable CORS for all routes
 app.use(cors());
+
+// Initialize Passport.js middleware
+app.use(passport.initialize());
+
+// Use the authentication routes
 
 
 // Database connection
@@ -31,11 +49,16 @@ app.use(express.json())
 
 
 // Routes 
+app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/user', userRouter)
+
+app.use('/api/v1/vendor', vendorRouter)
+
 app.use('/api/v1/product', productRouter)
 app.use('/api/v1/order', orderRouter)
 app.use('/api/v1/cart', cartRouter)
 app.use('/api/v1/payment', stripeCheckoutRouter)
+
 
 //cookie parser middleware
 app.use(cookieParser())

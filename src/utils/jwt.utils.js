@@ -8,7 +8,7 @@ export function generateToken(user){
 }
 export function refreshToken(user){
   const payload ={_id:user._id}
-  const token = jwt.sign(payload,config.refresh_secret_key,{expiresIn:config.refresh_expiry})
+  const token = jwt.sign(payload, config.refresh_secret_key, {expiresIn:config.refresh_expiry})
   return token
 }
 export function verifyToken(token){
