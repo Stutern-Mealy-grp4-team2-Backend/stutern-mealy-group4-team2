@@ -5,9 +5,9 @@ import {Types} from "mongoose";
 
 export default class ProductController {
     static async createProduct (req, res) {
-        const id = req.body.vendor
-        if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid vendor ID')
-        const { category } = req.body;
+        const { category, vendor } = req.body;
+        const isValidVendor = await Vendor.findById(vendor);
+        if(!isValidVendor) throw new BadUserRequestError('Please provide a valid vendor Id');
         if(!Product.schema.path('category').enumValues.includes(category)) throw new BadUserRequestError('Please provide a valid category');
         const product = await Product.create(req.body)
         res.status(201).json({
@@ -17,11 +17,11 @@ export default class ProductController {
     }
             
     static async searchProduct (req, res) {
-      const id = req.query.product_id;
-      if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid vendor ID')
+      const id = req.query.productId;
+      if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid ID')
       const product = await Product.findById(id)
       if(!product) throw new NotFoundError('Product not available');
-      res.status(201).json({
+      res.status(200).json({
       status: "Success",
       data: product,
       })
@@ -30,8 +30,9 @@ export default class ProductController {
     static async getAllProducts (req, res) {
       const products = await Product.find()
       if(products.length < 1) throw new NotFoundError('No Product available');
-      res.status(201).json({
+      res.status(200).json({
       status: "Success",
+      message: `${products.length} products available`,
       data: products,
       })
     }
@@ -44,6 +45,7 @@ export default class ProductController {
       }
       res.status(200).json({
         status: "Success",
+        message: `${products.length} products available`,
         data: products,
       });
     }

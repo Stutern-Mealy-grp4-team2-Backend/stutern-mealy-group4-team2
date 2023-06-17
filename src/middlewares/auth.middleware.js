@@ -8,7 +8,6 @@ export function userAuthMiddleWare(req, res, next){
   try {
     const payload = verifyToken(token)
     req.user = payload
-    console.log("one",req.user)
     next()
   }catch (err){
     throw new UnAuthorizedError("Access denied, invalid token.")
