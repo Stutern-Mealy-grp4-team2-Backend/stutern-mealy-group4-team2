@@ -13,6 +13,7 @@ export class OrderController {
         } = req
         try{
             const  product  = await Product.findById({_id:productId})
+            const productTotalPrice = product.discount > 0? product.price - (product.price*(product.discount/100)) : product.price
             if(!product && product.length === 0){
                 throw new BadUserRequestError("Product not found")
             }
@@ -23,7 +24,7 @@ export class OrderController {
                     orderItems:[{productId:product._id, quantity: 1}],
                     address,
                     paymentMethod,
-                    totalPrice: product.price
+                    totalPrice: productTotalPrice//product.price
                 })
                 const productOrder = await newOrder.save()
                 res.status(201).json(productOrder)
@@ -31,14 +32,14 @@ export class OrderController {
                 const isExisting =  order.orderItems.findIndex(objectId => new String(objectId.productId).trim() == new String(product._id).trim())
                 if(isExisting == -1){//if the product does not exist
                     order.orderItems.push({productId:product._id,quantity:1})
-                    order.totalPrice += product.price
+                    order.totalPrice += productTotalPrice//product.price
                 }else{
                     const existingProductInCart = order.orderItems[isExisting]
                     if(existingProductInCart.isPaid === true || existingProductInCart.isDelivered === true){
                         throw new UnAuthorizedError("This order has been booked already")
                     }
                     existingProductInCart.quantity += 1
-                    order.totalPrice  += product.price
+                    order.totalPrice  += productTotalPrice//product.price
                 }
                 const createOrder = await order.save()
                 res.status(201).json(createOrder)
