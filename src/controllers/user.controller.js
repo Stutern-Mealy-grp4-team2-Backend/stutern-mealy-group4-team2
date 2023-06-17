@@ -222,7 +222,7 @@ export default class UserController {
       //refresh token handler
   static async refresh (req,res){
     //access cookie to cookies
-    const cookies = req.Cookies
+    const cookies = req.cookies
     //check if cookies exist
     if(!cookies?.refresh_token) return res.status(401).json({
       status:"Failed",
@@ -232,7 +232,7 @@ export default class UserController {
     //find from record the cookie user
     const foundUser = await User.findOne({refreshToken:refreshTokenCookie})
     if (!foundUser) return res.sendStatus(403)
-    jwt.verify(refreshTokenCookie,config.refresh_secret_key,(err,decoded) => {
+    jwt.verify(refreshTokenCookie, config.refresh_secret_key,(err,decoded) => {
         if(err || foundUser._id !== decoded.payload._id) return res.status(403)
         const token = generateToken(foundUser)
         res.status(201).json(token)
