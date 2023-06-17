@@ -40,7 +40,7 @@ const UserSchema = new Schema({
     items:[
       {
           productId:{
-              type: mongoose.Schema.Types.ObjectId,
+              type: Types.ObjectId,
               ref:"Product"
           },
           quantity:{
@@ -100,6 +100,7 @@ UserSchema.methods.addToCart =  function(product){
       existingProductInCart.quantity += 1
       cart.totalPrice  += product.price
     }
+    return cart
   }
 }
 

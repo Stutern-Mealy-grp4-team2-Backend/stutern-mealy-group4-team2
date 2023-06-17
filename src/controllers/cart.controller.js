@@ -18,7 +18,7 @@ export default class CartController {
             }
             const shopCart = userCart.addToCart(product)
         res.status(201).json(shopCart)
-      } catch (error) {
+      } catch (err) {
         res.status(500).json({message:err.message})
       }
 
