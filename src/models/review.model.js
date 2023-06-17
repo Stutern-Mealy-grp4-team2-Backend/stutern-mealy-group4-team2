@@ -70,3 +70,5 @@ ReviewSchema.pre(/^find/, function (next){
       }  
       next()
 });
+
+export default model("Review", ReviewSchema)
