@@ -11,14 +11,9 @@ import { router as vendorRouter } from "./src/routers/vendor.route.js"
 import { router as authRouter } from "./src/routers/auth.route.js"
 
 import { router as productRouter } from "./src/routers/product.route.js"
-<<<<<<< HEAD
 import { router as orderRouter } from "./src/routers/order.route.js"
 import { router as cartRouter } from "./src/routers/cart.route.js"
 import { router as stripeCheckoutRouter } from "./src/controllers/payment.controller.js"
-=======
- 
-
->>>>>>> staging
 import { globalErrorHandler } from "./src/utils/errorHandler.js"
 import { config } from "./src/config/index.js";
 import cookieParser from "cookie-parser";
