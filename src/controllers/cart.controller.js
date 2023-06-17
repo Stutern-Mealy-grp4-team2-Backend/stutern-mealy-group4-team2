@@ -1,7 +1,5 @@
-import BadRequestError from "../../errors/badRequestError.js"
-import UnauthorizedError from "../../errors/unAuthorizedError.js"
 import { BadUserRequestError, UnAuthorizedError } from "../errors/error.js"
-import Product from "../product/ProductModel.js"
+import Product from "../models/product.model.js"
 import User from "../models/user.model.js"
 
 
