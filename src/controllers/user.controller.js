@@ -222,7 +222,7 @@ export default class UserController {
       //refresh token handler
   static async refresh (req,res){
     //access cookie to cookies
-    const cookies = req.Cookies
+    const cookies = req.cookies
     //check if cookies exist
     if(!cookies?.refresh_token) return res.status(401).json({
       status:"Failed",

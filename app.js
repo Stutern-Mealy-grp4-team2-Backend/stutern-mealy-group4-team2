@@ -41,7 +41,8 @@ const port = config.port || 5000;
 app.use(morgan('tiny'))
 app.use(express.json())
 
-
+//cookie parser middleware
+app.use(cookieParser())
 // Routes 
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/user', userRouter)
@@ -52,7 +53,6 @@ app.use('/api/v1/product', productRouter)
 
 
 //cookie parser middleware
-app.use(cookieParser())
 app.use(globalErrorHandler)
 
 // Setting up the express server
