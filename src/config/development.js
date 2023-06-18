@@ -24,6 +24,6 @@ export const development = {
   facebook_app_id: process.env.DEV_FACEBOOK_APP_ID,
   facebook_app_secret: process.env.DEV_FACEBOOK_APP_SECRET,
   facebook_callback_url: process.env.DEV_FACEBOOK_CALLBACK_URL,
-  max_file_upload: process.env.MAX_FILE_UPLOAD,
-  file_upload_path: process.env.FILE_UPLOAD_PATH
+  max_file_upload: process.env.DEV_MAX_FILE_UPLOAD,
+  file_upload_path: process.env.DEV_FILE_UPLOAD_PATH
 }
