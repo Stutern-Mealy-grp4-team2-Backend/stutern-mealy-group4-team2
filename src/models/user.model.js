@@ -56,7 +56,7 @@ const UserSchema = new Schema({
   cityAndState: String,
   numberAndStreet: String,
   postalCode: Number,
-
+  profilePhoto: String,
 
 //   favourites: [{
 //     type: Types.ObjectId,
