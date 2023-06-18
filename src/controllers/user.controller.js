@@ -30,7 +30,7 @@ export default class UserController {
       } else {
       throw new BadUserRequestError(`Please log in to ${email} to get your verification link.`);
       }
-}
+    }
       // Generate verification token
       const saltRounds = config.bycrypt_salt_round
       // Create verification token
@@ -272,7 +272,6 @@ export default class UserController {
 
   static async getProfile(req, res,) {
         const userId = req.user._id;
-        // if(!userId) throw new UnAuthorizedError('Not authorized')
         // Fetch the user from the database
         const user = await User.findById(userId).select('-_id');
         res.status(200).json({
@@ -303,13 +302,20 @@ export default class UserController {
         })
     }
 
-    static async updateAddressInfo(req, res,) {
+     static async updateAddressInfo(req, res,) {
         const userId = req.user._id;
         // if(!userId) throw new UnAuthorizedError('Not authorized')
+        const { countryName,  cityAndState, numberAndStreet, postalCode } = req.body;
         // Fetch the user from the database
         const user = await User.findById(userId);
         // Update the personal information
-        if(!req.files) throw new BadUserRequestError('Please upload a profile photo');
+        user.countryName = countryName;
+        user.cityAndState = cityAndState;
+        user.numberAndStreet = numberAndStreet;
+        user.postalCode = postalCode;
+        await user.save();
+        const userData = user.toObject();
+        delete userData._id;
         res.status(200).json({
         status: "Success",
         message: "Address updated successfully",
