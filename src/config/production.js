@@ -24,5 +24,7 @@ export const production = {
   google_callback_url: process.env.PRODUCTION_GOOGLE_CALLBACK_URL,
   facebook_app_id: process.env.PRODUCTION_FACEBOOK_APP_ID,
   facebook_app_secret: process.env.PRODUCTION_FACEBOOK_APP_SECRET,
-  facebook_callback_url: process.env.PRODUCTION_FACEBOOK_CALLBACK_URL
+  facebook_callback_url: process.env.PRODUCTION_FACEBOOK_CALLBACK_URL,
+  max_file_upload: process.env.PRODUCTION_MAX_FILE_UPLOAD,
+  file_upload_path: process.env.PRODUCTION_FILE_UPLOAD_PATH
 }

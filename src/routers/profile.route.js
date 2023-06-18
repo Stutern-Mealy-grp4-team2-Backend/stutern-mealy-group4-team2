@@ -8,5 +8,6 @@ const router = Router()
 router.get("/", userAuthMiddleWare, tryCatchHandler(UserController.getProfile));
 router.put("/personalinfo", userAuthMiddleWare, tryCatchHandler(UserController.updatePersonalInfo));
 router.put("/addressinfo", userAuthMiddleWare, tryCatchHandler(UserController.updateAddressInfo));
+router.put("/photo", userAuthMiddleWare, tryCatchHandler(UserController.profilePhotoUpload));
 
 export { router }
