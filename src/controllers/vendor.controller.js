@@ -40,7 +40,7 @@ export default class VendorController {
     if (products.length < 1) throw new BadUserRequestError(`${name} does not have any product yet.`);
     return res.status(200).json({
       status: "Success",
-      message: "Products available",
+      message: `${products.length} products available`,
       data: {
         products,
       }
@@ -53,6 +53,7 @@ export default class VendorController {
     if(vendors.length < 1) throw new NotFoundError(`No vendor available. Please check back later`)
     res.status(200).json({
       status: "Success",
+      message: `${vendors.length} vendors available`,
       vendors,
     })
   }
@@ -70,6 +71,7 @@ export default class VendorController {
 
     res.status(200).json({
       status: "Success",
+      message: `${vendors.length} vendors available`,
       data: vendors,
     });
   }

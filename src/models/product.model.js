@@ -59,10 +59,9 @@ const ProductSchema = new Schema({
         type: Number,
         required: true
     },
-    reviews: {
-        type: Types.ObjectId,
-        ref: 'Review'
-    },
+    reviews: [{
+        type: String,
+    }],
     isDeleted: {
         type: Boolean,
         default: false,

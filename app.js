@@ -4,13 +4,12 @@ import passport from 'passport';
 import mongoose from "mongoose";
 import morgan from "morgan";
 import { router as userRouter } from "./src/routers/user.route.js"
-
 import { router as vendorRouter } from "./src/routers/vendor.route.js"
-
-
 import { router as authRouter } from "./src/routers/auth.route.js"
-
 import { router as productRouter } from "./src/routers/product.route.js"
+import { router as reviewRouter } from "./src/routers/review.route.js"
+import { router as profileRouter } from "./src/routers/profile.route.js"
+
 import { router as orderRouter } from "./src/routers/order.route.js"
 import { router as cartRouter } from "./src/routers/cart.route.js"
 import { router as stripeCheckoutRouter } from "./src/controllers/payment.controller.js"
@@ -46,13 +45,8 @@ app.use(express.json())
 // Routes 
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/user', userRouter)
-
 app.use('/api/v1/vendor', vendorRouter)
-
 app.use('/api/v1/product', productRouter)
-app.use('/api/v1/order', orderRouter)
-app.use('/api/v1/cart', cartRouter)
-app.use('/api/v1/payment', stripeCheckoutRouter)
 
 
 //cookie parser middleware

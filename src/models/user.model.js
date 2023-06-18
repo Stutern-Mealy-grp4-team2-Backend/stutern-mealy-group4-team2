@@ -65,6 +65,18 @@ const UserSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  firstName: String,
+  lastName: String,
+  phone: {
+    type: String,
+    unique: true,
+  },
+  countryName: String,
+  cityAndState: String,
+  numberAndStreet: String,
+  postalCode: Number,
+
+
 //   favourites: [{
 //     type: Types.ObjectId,
 //     ref: 'Product'
