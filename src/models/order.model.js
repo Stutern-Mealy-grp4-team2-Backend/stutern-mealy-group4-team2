@@ -23,10 +23,11 @@ const OrderSchema = new Schema({
         enum: ['pending', 'ongoing', 'completed'],
         default: 'pending'
     },
-    creator: {
+    user: {
         type: Types.ObjectId,
         ref: 'User',
     },
+    totalPrice: Number,
     dateOrdered: {
         Type: Date,
         default: Date.now()
@@ -41,3 +42,4 @@ const OrderSchema = new Schema({
 })
 
 export default model('Order', OrderSchema)
+
