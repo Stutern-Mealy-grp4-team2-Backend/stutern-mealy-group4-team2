@@ -2,6 +2,7 @@ import express  from "express";
 import  './src/config/passport.js';
 import passport from 'passport';
 import mongoose from "mongoose";
+import fileupload from "express-fileupload";
 import morgan from "morgan";
 import { router as userRouter } from "./src/routers/user.route.js"
 import { router as vendorRouter } from "./src/routers/vendor.route.js"
@@ -9,6 +10,9 @@ import { router as authRouter } from "./src/routers/auth.route.js"
 import { router as productRouter } from "./src/routers/product.route.js"
 import { router as reviewRouter } from "./src/routers/review.route.js"
 import { router as profileRouter } from "./src/routers/profile.route.js"
+import path from "path";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';;
 
 import { router as orderRouter } from "./src/routers/order.route.js"
 import { router as cartRouter } from "./src/routers/cart.route.js"
@@ -18,6 +22,8 @@ import { config } from "./src/config/index.js";
 import cookieParser from "cookie-parser";
 import cors from "cors"
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express()
 
@@ -40,6 +46,10 @@ const port = config.port || 5000;
 // Middlewares
 app.use(morgan('tiny'))
 app.use(express.json())
+// For file uploads
+app.use(fileupload())
+// Set static folder
+app.use(express.static(path.join(__dirname, 'profile')));
 
 
 // Routes 
