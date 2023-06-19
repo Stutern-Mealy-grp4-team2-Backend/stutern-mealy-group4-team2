@@ -1,5 +1,6 @@
 import express from "express"
 const router = express.Router()
+import { config } from "../config/index.js"
 import Stripe from "stripe";
 const stripe = Stripe(config.stripe_secret_keys)
 
