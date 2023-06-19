@@ -44,7 +44,7 @@ export default class UserController {
       password: hashedPassword,
       receivePromotionalEmails,
       verifyEmailToken,
-      verifyEmailTokenExpire: Date.now() + config.token_expiry,
+      verifyEmailTokenExpire: Date.now() + parseInt(config.token_expiry),
       });
       
      await user.save()
