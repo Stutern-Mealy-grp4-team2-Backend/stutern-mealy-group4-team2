@@ -2,11 +2,13 @@ import express from "express"
 const router = express.Router()
 import CartController from "../controllers/cart.controller.js"
 
-//router.get("/", CartController.getAllCart)
+
 router.post("/:productId", CartController.addToCart)
-//router.put("/:cartId", CartController.updateCart)
-//router.get("/:userId", CartController.getCart)
-//router.delete("/:cartId", CartController.deleteCart)
+router.post("/:productId", CartController.removeFromCart)
+router.get("/:productId", CartController.editCart)
+router.get("/user",CartController.getCart)
+router.get("/delete",CartController.deleteCart)
+
 
 
 export {router}

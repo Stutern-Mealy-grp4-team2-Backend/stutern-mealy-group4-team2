@@ -97,24 +97,6 @@ const UserSchema = new Schema({
   timestamps: true
 });
 
-UserSchema.methods.addToCart =  function(product){
-  let cart = this.cart
-  if(cart.items.length == 0){
-    cart.items.push({productId:product._id, quantity:1})
-    cart.totalPrice = product.price
-  }else{
-    const isExisting =  cart.item.findIndex(objectId => objectId.productId == product._id)
-    if(isExisting == -1){//if the product does not exist
-      cart.items.push({productId:product._id,quantity:1})
-      cart.totalPrice += product.price
-    }else{
-      const existingProductInCart = cart.items[isExisting]
-      existingProductInCart.quantity += 1
-      cart.totalPrice  += product.price
-    }
-    return cart
-  }
-}
 
 UserSchema.index({ location: '2dsphere' });
 
