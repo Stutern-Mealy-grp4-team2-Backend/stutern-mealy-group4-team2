@@ -8,7 +8,7 @@ const OrderSchema = new Schema({
         required: true
     }],
     
-    address: {
+    deliveryAddress: {
     type: String,
     min: [5, 'Address must contain at least 5 characters long'],
     required: [true, 'Please add a valid address']
