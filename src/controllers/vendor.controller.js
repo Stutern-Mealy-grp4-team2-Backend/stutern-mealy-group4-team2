@@ -1,7 +1,8 @@
 import Vendor from "../models/vendor.model.js"
 import Product from "../models/product.model.js"
 import { BadUserRequestError, NotFoundError } from "../errors/error.js"
-
+import pkg from 'lodash';
+const { escapeRegExp } = pkg;
 
 export default class VendorController {
   static async createVendor(req, res,){
@@ -22,13 +23,32 @@ export default class VendorController {
   }
 
   static async searchVendor(req, res) {
-    const { name } = req.query
-    const vendor = await Vendor.find({name})
-    if(vendor.length < 1) throw new NotFoundError(`${name} does not exist`)
+    const { name, phone, address, location } = req.query;
+    const query = {};
+    const products = await Product.find({ vendor: category.toLowerCase() })
+    if (address) {
+      query.address = { $regex: new RegExp(address, 'i') };
+    }
+
+    if (name) {
+      query.name = { $regex: new RegExp(name, 'i') };
+    }
+
+    if (phone) {
+      query.phone = { $regex: new RegExp(phone, 'i') }; // Case-insensitive search
+    }
+
+    if (location) {
+      query.location = { $regex: new RegExp(location, 'i') }; // Case-insensitive search
+    }
+    const vendors = await Vendor.find(query)
+    if(vendors.length < 1) throw new NotFoundError('Vendor not available');
+  
     return res.status(200).json({
       status: "Success",
-      data: vendor,
-    })
+      message: `${vendors.length} vendors available`,
+      data: vendors,
+    });
   }
 
   static async getAllVendorProducts(req, res) {
@@ -36,7 +56,7 @@ export default class VendorController {
     const vendor = await Vendor.findOne({name})
     if(!vendor) throw new NotFoundError(`${name} does not exist`)
 
-    const products =  await Product.find({ vendor: vendor._id }).populate("vendor")
+    const products =  await Product.find({ vendor: name }).populate("vendor")
     if (products.length < 1) throw new BadUserRequestError(`${name} does not have any product yet.`);
     return res.status(200).json({
       status: "Success",
@@ -61,18 +81,27 @@ export default class VendorController {
   static async getVendorsByCategory(req, res) {
     const { category } = req.query;
 
-    const products = await Product.find({ category }).select("vendor").populate("vendor");
+    const products = await Product.find({ category: category.toLowerCase() })
 
     if (products.length < 1) {
       throw new NotFoundError("No vendor available in the specified category");
     }
 
-    const vendors = products.map((product) => product.vendor);
+    const vendors = [...new Set(products.map((product) => product.vendor))];
 
     res.status(200).json({
       status: "Success",
       message: `${vendors.length} vendors available`,
       data: vendors,
     });
+  }
+
+  static async deleteAllVendors(req, res) {
+    const vendors = await Vendor.find()
+    if(vendors.length < 1) throw new NotFoundError(`No vendor available. Please check back later`)
+    await Vendor.deleteMany()
+    res.status(200).json({
+      status: "All vendors deleted successfully",
+    })
   }
 }

@@ -8,6 +8,7 @@ import { router as vendorRouter } from "./src/routers/vendor.route.js"
 import { router as authRouter } from "./src/routers/auth.route.js"
 import { router as productRouter } from "./src/routers/product.route.js"
 import { router as reviewRouter } from "./src/routers/review.route.js"
+import { router as categoryRouter } from "./src/routers/category.route.js"
 
 import { globalErrorHandler } from "./src/utils/errorHandler.js"
 import { config } from "./src/config/index.js";
@@ -44,6 +45,7 @@ app.use('/api/v1/user', userRouter)
 app.use('/api/v1/vendor', vendorRouter)
 app.use('/api/v1/product', productRouter)
 app.use('/api/v1/reviews', reviewRouter)
+app.use('/api/v1/categories', categoryRouter)
 
 
 //cookie parser middleware
