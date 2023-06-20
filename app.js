@@ -13,6 +13,7 @@ import { router as profileRouter } from "./src/routers/profile.route.js"
 import path from "path";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';;
+import { router as categoryRouter } from "./src/routers/category.route.js"
 
 import { globalErrorHandler } from "./src/utils/errorHandler.js"
 import { config } from "./src/config/index.js";
@@ -56,6 +57,7 @@ app.use('/api/v1/vendor', vendorRouter)
 app.use('/api/v1/product', productRouter)
 app.use('/api/v1/reviews', reviewRouter)
 app.use('/api/v1/profile', profileRouter)
+app.use('/api/v1/categories', categoryRouter)
 
 
 //cookie parser middleware

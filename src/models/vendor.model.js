@@ -4,6 +4,7 @@ const VendorSchema = new Schema({
   name: {
     type: String,
     unique: true,
+    trim:true,
     min: [3, 'Name must be at least 3 characters long'],
     max: [20, 'Name must not be more than 20 characters long'],
     required: [true, 'Please add a name']
@@ -28,7 +29,7 @@ const VendorSchema = new Schema({
     type: Types.ObjectId,
     ref: 'Product',
 },
-  vendorID: String,
+
   // location: {
   //   type: {
   //     type: String,
@@ -63,7 +64,6 @@ const VendorSchema = new Schema({
   
   
 })
-VendorSchema.index({ name: 'text', description: 'text' });
 
 VendorSchema.index({ location: '2dsphere' });
 
