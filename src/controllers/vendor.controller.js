@@ -24,7 +24,7 @@ export default class VendorController {
   static async searchVendor(req, res) {
     const { name, phone, address, location } = req.query;
     const query = {};
-    const products = await Product.find({ vendor: category.toLowerCase() })
+    
     if (address) {
       query.address = { $regex: new RegExp(address, 'i') };
     }
