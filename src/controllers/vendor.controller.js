@@ -1,8 +1,7 @@
 import Vendor from "../models/vendor.model.js"
 import Product from "../models/product.model.js"
 import { BadUserRequestError, NotFoundError } from "../errors/error.js"
-import pkg from 'lodash';
-const { escapeRegExp } = pkg;
+
 
 export default class VendorController {
   static async createVendor(req, res,){

@@ -2,7 +2,7 @@ import Product from "../models/product.model.js"
 import Vendor from "../models/vendor.model.js"
 import Category from "../models/category.model.js"
 import { BadUserRequestError, NotFoundError } from "../errors/error.js"
-import {Types} from "mongoose";
+
 
 export default class ProductController {
     static async createProduct (req, res) {
