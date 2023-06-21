@@ -31,6 +31,10 @@ const orderSchema = new Schema({
         type:String, 
         required: true
     },
+    isPending:{
+        type:Boolean,
+        default:true
+    },
     paymentResult:{
         id:{type:String},
         status:{type:String},

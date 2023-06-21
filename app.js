@@ -17,7 +17,7 @@ import { dirname } from 'path';;
 import { router as orderRouter } from "./src/routers/order.route.js"
 import { router as cartRouter } from "./src/routers/cart.route.js"
 import { router as stripeCheckoutRouter } from "./src/controllers/payment.controller.js"
-import { globalErrorHandler } from "./src/utils/errorHandler.js"
+ import { globalErrorHandler } from "./src/utils/errorHandler.js"
 import { config } from "./src/config/index.js";
 import cookieParser from "cookie-parser";
 import cors from "cors"
@@ -51,16 +51,20 @@ app.use(fileupload())
 // Set static folder
 app.use(express.static(path.join(__dirname, 'profile')));
 
+//cookie parser middleware
+app.use(cookieParser())
 
 // Routes 
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/user', userRouter)
 app.use('/api/v1/vendor', vendorRouter)
 app.use('/api/v1/product', productRouter)
+app.use('/api/v1/order', orderRouter)
+app.use('/api/v1/cart', cartRouter)
+app.use('/api/v1/payment', stripeCheckoutRouter)
 
 
-//cookie parser middleware
-app.use(cookieParser())
+
 app.use(globalErrorHandler)
 
 // Setting up the express server

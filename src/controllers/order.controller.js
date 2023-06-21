@@ -5,7 +5,7 @@ import {BadUserRequestError,UnAuthorizedError} from "../errors/error.js"
 
 
 
-export class OrderController { 
+export default class OrderController { 
     static async createMealOrder (req,res) {
         const {body:{
             address,
@@ -57,7 +57,7 @@ export class OrderController {
         const order = await Order.findById({_id: orderId}).populate(//populate is used to reference a "ref"
             "user", //user is from the user ref in order model
             "username email" //name and email are from the user model
-        ).populate("orderItems.productId")
+        )
         if(order){
             res.status(201).json(order)
         }else{

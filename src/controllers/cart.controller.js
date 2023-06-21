@@ -15,7 +15,7 @@ export default class CartController {
           if(!product && product.length === 0){
               throw new BadUserRequestError("Product not found")
           }
-          const  user  = await User.findById({_id:req.user.jwtId})
+          const  user  = await User.findById({_id:req.user._id})
           if(!user) throw new UnAuthorizedError("Please sign up to create a cart")
           console.log(user.cart.items)
           if(user.cart.items.length === 0){
