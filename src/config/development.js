@@ -10,7 +10,7 @@ export const development = {
   port: +process.env.PORT,
   jwt_expiry: process.env.DEV_JWT_EXPIRY,
   refresh_expiry: process.env.DEV_REFRESH_EXPIRY,
-  token_expiry: process.env.DEV_TOKEN_EXPIRY,
+  token_expiry: +process.env.DEV_TOKEN_EXPIRY,
   cookie_max_age: process.env.DEV_COOKIE_MAX_AGE,
   smtp_host: process.env.DEV_SMTP_HOST,
   smtp_port: process.env.DEV_SMTP_PORT,

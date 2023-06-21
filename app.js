@@ -44,6 +44,8 @@ const port = config.port || 5000;
 // Middlewares
 app.use(morgan('tiny'))
 app.use(express.json())
+//cookie parser middleware
+app.use(cookieParser())
 // For file uploads
 app.use(fileupload())
 // Set static folder
@@ -60,8 +62,7 @@ app.use('/api/v1/profile', profileRouter)
 app.use('/api/v1/categories', categoryRouter)
 
 
-//cookie parser middleware
-app.use(cookieParser())
+
 app.use(globalErrorHandler)
 
 // Setting up the express server
