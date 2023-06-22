@@ -1,10 +1,9 @@
-import { required } from "joi";
 import { Schema, model, Types, Query }  from "mongoose";
 
 const OrderSchema = new Schema({
     orderItems: [{
         type: Types.ObjectId,
-        ref: 'OrderItem',
+        ref: 'Cart',
         required: true
     }],
     
@@ -18,27 +17,27 @@ const OrderSchema = new Schema({
     type: Types.ObjectId,
     ref: 'Product',
     },
-    status: {
+    orderStatus: {
         type: String,
-        enum: ['pending', 'ongoing', 'completed'],
+        enum: ['pending', 'processing', 'cancelled', 'cash on delievery', 'dispatched', 'completed'],
         default: 'pending'
     },
-    user: {
+    orderedBy: {
         type: Types.ObjectId,
         ref: 'User',
     },
     totalPrice: Number,
-    dateOrdered: {
-        Type: Date,
-        default: Date.now()
-    },
+    
     phone: {
     type: String,
     unique: true,
     required: [true, 'Please add a valid phone']
     },
     notes: String,
+    paymentMethod: {},
     
+}, {
+    timestamps: true
 })
 
 export default model('Order', OrderSchema)
