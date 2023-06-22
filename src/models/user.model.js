@@ -56,7 +56,10 @@ const UserSchema = new Schema({
   cityAndState: String,
   numberAndStreet: String,
   postalCode: Number,
-  profilePhoto: String,
+  profilePhoto: {
+    type: String,
+    default: 'no-photo.jpg'
+  },
 
 //   favourites: [{
 //     type: Types.ObjectId,

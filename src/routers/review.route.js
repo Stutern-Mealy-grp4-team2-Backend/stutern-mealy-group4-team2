@@ -6,14 +6,12 @@ import { userAuthMiddleWare } from "../middlewares/auth.middleware.js";
 
 const router = Router()
 
-router.post("/product/create/:productId", userAuthMiddleWare, tryCatchHandler(ReviewController.createReview) )
-router.get("/product/all/:productId", tryCatchHandler(ReviewController.getProductReviews) )
-router.get("/product/:productId", tryCatchHandler(ReviewController.getProductReview) )
-router.delete("/product/:reviewId", userAuthMiddleWare, tryCatchHandler(ReviewController.deleteReview) )
-
-router.delete("/product/:productId", userAuthMiddleWare, tryCatchHandler(ReviewController.deleteReviews) )
-
-router.put("/product/:reviewId", userAuthMiddleWare, tryCatchHandler(ReviewController.updateReview) )
+router.post("/create/:productId", userAuthMiddleWare, tryCatchHandler(ReviewController.createReview) )
+router.get("/allreviews/:productId", tryCatchHandler(ReviewController.getProductReviews) )
+router.get("/:productId", tryCatchHandler(ReviewController.getProductReview) )
+router.delete("/:reviewId", userAuthMiddleWare, tryCatchHandler(ReviewController.deleteReview) )
+router.delete("/:productId", userAuthMiddleWare, tryCatchHandler(ReviewController.deleteReviews) )
+router.put("/:reviewId", userAuthMiddleWare, tryCatchHandler(ReviewController.updateReview) )
 
 
 export { router }

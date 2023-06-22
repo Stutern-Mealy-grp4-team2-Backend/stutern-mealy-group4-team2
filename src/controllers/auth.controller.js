@@ -29,7 +29,7 @@ export default class AuthController {
       delete userData._id;
       delete userData.password;
       delete userData.googleId;
-      const maxAge = parseInt(config.cookie_max_age);
+      const maxAge = config.cookie_max_age;
       res.cookie("refresh_token", refresh, { 
       httpOnly: true,
       secure: true,
@@ -65,7 +65,7 @@ export default class AuthController {
       const userData = user.toObject();
       delete userData._id;
       delete userData.password;
-      const maxAge = parseInt(config.cookie_max_age);
+      const maxAge = config.cookie_max_age;
       res.cookie("refresh_token", refresh, { 
       httpOnly: true,
       secure: true,
