@@ -1,10 +1,11 @@
 import { createUserValidator, loginUserValidator, resetPasswordValidator } from "../validators/user.validator.js"
-import { BadUserRequestError, NotFoundError, UnAuthorizedError } from "../errors/error.js"
+import { BadUserRequestError, NotFoundError, UnAuthorizedError, FailedRequestError } from "../errors/error.js"
 import User from "../models/user.model.js"
 import bcrypt from "bcrypt"
 import {config} from "../config/index.js"
 import { sendEmail } from "../utils/sendEmail.js"
 import { generateToken, refreshToken } from "../utils/jwt.utils.js"
+import path from "path";
 
 
 
@@ -29,7 +30,7 @@ export default class UserController {
       } else {
       throw new BadUserRequestError(`Please log in to ${email} to get your verification link.`);
       }
-}
+    }
       // Generate verification token
       const saltRounds = config.bycrypt_salt_round
       // Create verification token
@@ -82,6 +83,9 @@ export default class UserController {
       // console.log(refresh)
       user.refreshToken = refresh
       await user.save()
+      const userData = user.toObject();
+      delete userData._id;
+      delete userData.password;
       const maxAge = parseInt(config.cookie_max_age);
       res.cookie("refresh_token", refresh, { 
       httpOnly: true,
@@ -93,9 +97,8 @@ export default class UserController {
       status: "Success",
       message: 'Account activated successfully.',
       data: {
-        name: user.name,
-        email: user.email,
-        access_token: token,
+        user: userData,
+        access_token: token
       },
       })
     }
@@ -117,6 +120,9 @@ export default class UserController {
       // console.log(refresh)
       user.refreshToken = refresh
       await user.save()
+      const userData = user.toObject();
+      delete userData._id;
+      delete userData.password;
       const maxAge = parseInt(config.cookie_max_age);
       res.cookie("refresh_token", refresh, { 
       httpOnly: true,
@@ -129,12 +135,9 @@ export default class UserController {
         status: "Success",
         message: "Login successful",
         data: {
-          user: {
-            name: user.name,
-            email: user.email,
-          },
-          access_token: token,
-        }
+          user: userData,
+          access_token: token
+        },
       })
     }
 
@@ -201,6 +204,9 @@ export default class UserController {
       user.resetPasswordExpire = undefined;
       user.refreshToken = refresh
       await user.save();
+      const userData = user.toObject();
+      delete userData._id;
+      delete userData.password;
       const maxAge = parseInt(config.cookie_max_age);
       res.cookie("refresh_token", refresh, { 
       httpOnly: true,
@@ -212,8 +218,7 @@ export default class UserController {
         status: "Success",
         message: "Password updated successfully",
         data: {
-          name: user.name,
-          email: user.email,
+          user: userData,
           access_token: token
         },
       });
@@ -232,7 +237,7 @@ export default class UserController {
     //find from record the cookie user
     const foundUser = await User.findOne({refreshToken:refreshTokenCookie})
     if (!foundUser) return res.sendStatus(403)
-    jwt.verify(refreshTokenCookie,config.refresh_secret_key,(err,decoded) => {
+    jwt.verify(refreshTokenCookie, config.refresh_secret_key,(err,decoded) => {
         if(err || foundUser._id !== decoded.payload._id) return res.status(403)
         const token = generateToken(foundUser)
         res.status(201).json(token)
@@ -263,6 +268,88 @@ export default class UserController {
     status: 'status',
     message:"Logout successful"
   })
+  }
+
+  static async getProfile(req, res,) {
+        const userId = req.user._id;
+        // Fetch the user from the database
+        const user = await User.findById(userId).select('-_id');
+        res.status(200).json({
+        status: "Success",
+        data: user,
+        })
+    }
+
+    static async updatePersonalInfo(req, res,) {
+        const userId = req.user._id;
+        // if(!userId) throw new UnAuthorizedError('Not authorized')
+        const { phone, firstName, lastName } = req.body;
+        // Fetch the user from the database
+        const user = await User.findById(userId);
+        // Update the personal information
+        user.firstName = firstName;
+        user.lastName = lastName;
+        user.phone = phone;
+        const fullName = firstName + ' ' + lastName;
+        user.name = fullName;
+        await user.save();
+        const userData = user.toObject();
+        delete userData._id;
+        res.status(200).json({
+        status: "Success",
+        message: "Personal information updated successfully",
+        data: userData,
+        })
+    }
+
+     static async updateAddressInfo(req, res,) {
+        const userId = req.user._id;
+        // if(!userId) throw new UnAuthorizedError('Not authorized')
+        const { countryName,  cityAndState, numberAndStreet, postalCode } = req.body;
+        // Fetch the user from the database
+        const user = await User.findById(userId);
+        // Update the personal information
+        user.countryName = countryName;
+        user.cityAndState = cityAndState;
+        user.numberAndStreet = numberAndStreet;
+        user.postalCode = postalCode;
+        await user.save();
+        const userData = user.toObject();
+        delete userData._id;
+        res.status(200).json({
+        status: "Success",
+        message: "Address updated successfully",
+        data: userData,
+        })
+    }
+
+    static async profilePhotoUpload(req, res, next) {
+      const userId = req.user._id;     
+      // Fetch the user from the database
+      const user = await User.findById(userId);
+      // Update the personal information
+      if(!req.files) throw new BadUserRequestError('Please upload a profile photo');
+      const file = req.files.file;
+      if(!file.mimetype.startsWith('image')) throw new BadUserRequestError('Please upload the required format');
+      // Check file size
+      if(file.size > config.max_file_upload) throw new BadUserRequestError(`Please upload an image less than ${config.max_file_upload}`);
+      // Create a custom filename
+      file.name = `photo_${userId}${path.parse(file.name).ext}`;
+      
+      file.mv(`${config.file_upload_path}/${file.name}`, async err => {
+        if(err) {
+          console.error(err);
+          return next(new FailedRequestError('Problem with file upload'))
+        }
+        await User.findByIdAndUpdate(userId, { profilePhoto: file.name })
+
+        res.status(200).json({
+        status: "Success",
+        message: "Profile photo updated successfully",
+        data: file.name,
+      })
+      })
+      
   }
     
   static async findDevUser(req, res) {

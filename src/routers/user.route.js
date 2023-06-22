@@ -20,8 +20,6 @@ router.delete("/deleteuser/:email", tryCatchHandler(UserController.deleteUser));
 router.delete("/deleteuser/:id", tryCatchHandler(UserController.deleteDevUser));
 router.get("/logout", userAuthMiddleWare, tryCatchHandler(UserController.logout));
 router.get("/refresh", userAuthMiddleWare, tryCatchHandler(UserController.refresh));
-router.get("/profile", userAuthMiddleWare, tryCatchHandler(UserController.profile));
-router.put("/Profile/:userId", userAuthMiddleWare, tryCatchHandler(UserController.updateProfile));
 
 
 //Exporting the User Router
