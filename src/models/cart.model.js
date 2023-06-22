@@ -16,8 +16,14 @@ const CartSchema = new Schema({
   },
 ],
   
-  totalAfterDiscount: Number,
   cartTotal: Number,
+  shippingFee: Number,
+  vatDeduction: Number,
+  cartSubTotal: Number,
+  discount: {
+    type: Number,
+    default: 0
+  },
   orderedBy: {
     type: Types.ObjectId,
     ref: 'User',

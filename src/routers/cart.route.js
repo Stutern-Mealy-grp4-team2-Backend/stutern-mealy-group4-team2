@@ -6,11 +6,9 @@ import { userAuthMiddleWare } from "../middlewares/auth.middleware.js";
 const router = Router()
 
 router.post("/add", userAuthMiddleWare, tryCatchHandler(CartController.addToCart));
+router.post("/applydiscount", userAuthMiddleWare, tryCatchHandler(CartController.applyDiscount));
 router.get("/", userAuthMiddleWare, tryCatchHandler(CartController.getUserCart));
 router.delete("/", userAuthMiddleWare, tryCatchHandler(CartController.emptyCart));
-
-
-
 
 
 export { router }

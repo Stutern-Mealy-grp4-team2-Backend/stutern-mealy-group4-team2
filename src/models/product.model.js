@@ -110,3 +110,19 @@ ProductSchema.pre(/^find/, function (next){
 
 
 export default model("Product", ProductSchema)
+
+
+
+// productSchema.methods.discountPrice = function(/*discountValue*/){
+//         const originalPrice = this.name.reduce((total,restaurant) => {
+//             const restaurantPrice = restaurant.food.reduce((subtotal, foodItem) => {
+//                 return subtotal + foodItem.price
+//             })
+//             return total + restaurantPrice
+//         }, 0)
+//         const discountAmount = (this.discount/100)*originalPrice
+//         const discountedPrice = originalPrice - discountAmount
+//         return parseFloat(discountedPrice.toFixed(2))
+//         this.discount = discountValue
+//         return this.save()
+// }
