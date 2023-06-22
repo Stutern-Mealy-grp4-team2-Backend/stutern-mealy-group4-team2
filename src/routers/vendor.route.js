@@ -7,7 +7,7 @@ const router = Router()
 
 router.post("/create", tryCatchHandler(VendorController.createVendor));
 router.get("/all", tryCatchHandler(VendorController.getAllVendors));
-router.get("/search", tryCatchHandler(VendorController.searchVendor));
+router.get("/", tryCatchHandler(VendorController.searchVendor));
 router.get("/category", tryCatchHandler(VendorController.getVendorsByCategory));
 router.get("/:name", tryCatchHandler(VendorController.getAllVendorProducts));
 router.delete("/all", tryCatchHandler(VendorController.deleteAllVendors));
