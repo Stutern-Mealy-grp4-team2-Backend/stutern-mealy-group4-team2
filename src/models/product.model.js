@@ -1,4 +1,5 @@
 import { Schema, model, Types, Query }  from "mongoose";
+import slugify from "slugify";
 
 const ProductSchema = new Schema({
     name: {
@@ -35,6 +36,10 @@ const ProductSchema = new Schema({
     vendor: {
         type: String,
         required: true
+    },
+    slug: {
+        type: String,
+        trim: true
     },
     category: {
         type: String,
@@ -92,15 +97,16 @@ ProductSchema.pre('save', function (next) {
     this.category = this.category.toLowerCase();
     next();
 });
-
+ProductSchema.pre('save', function (next) {
+    this.slug = slugify(this.name, { lower: true });
+    next();
+});
 ProductSchema.pre(/^find/, function (next){
     if (this instanceof Query) {
         this.where({ isDeleted: { $ne: true } }); 
       }  
       next()
 });
-
-
 
 
 export default model("Product", ProductSchema)

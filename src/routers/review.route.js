@@ -7,7 +7,7 @@ import { userAuthMiddleWare } from "../middlewares/auth.middleware.js";
 const router = Router()
 
 router.post("/create/:productId", userAuthMiddleWare, tryCatchHandler(ReviewController.createReview) )
-router.get("/all/:productId", tryCatchHandler(ReviewController.getProductReviews) )
+router.get("/allreviews/:productId", tryCatchHandler(ReviewController.getProductReviews) )
 router.get("/:productId", tryCatchHandler(ReviewController.getProductReview) )
 router.delete("/:reviewId", userAuthMiddleWare, tryCatchHandler(ReviewController.deleteReview) )
 router.delete("/:productId", userAuthMiddleWare, tryCatchHandler(ReviewController.deleteReviews) )

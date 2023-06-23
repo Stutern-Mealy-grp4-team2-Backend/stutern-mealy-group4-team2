@@ -67,8 +67,37 @@ export default class VendorController {
   }
 
   static async getAllVendors(req, res) {
-    // const vendors = await Vendor.find({}, 'name description phone address -_id')
-    const vendors = await Vendor.find()
+    const queryObj = { ...req.query };
+      const excludeFields = ["page", "sort", "limit", "fields"]
+      excludeFields.forEach((el) => delete queryObj[el]);
+      let queryStr = JSON.stringify(queryObj);
+      queryStr = queryStr.replace(/\b(gte|gt|lte|lt|in)\b/g, (match) => `$${match}`)
+      let query = Vendor.find(JSON.parse(queryStr))
+      // Sorting
+      if(req.query.sort) {
+        const sortBy = req.query.sort.split(",").join(" ");
+        query = query.sort(sortBy)
+      } else {
+        query = query.sort("-createdAt");
+      }
+      // Limiting the fields
+      if(req.query.fields) {
+        const fields = req.query.fields.split(",").join(" ");
+        query = query.select(fields)
+      } else {
+        query = query.select('-__v');
+      }
+      // Pagination
+      const page = req.query.page;
+      const limit = req.query.limit;
+      const skip = (page - 1) * limit;
+      query = query.skip(skip).limit(limit);
+      if(req.query.page) {
+        const productCount = await Vendor.countDocuments();
+        if (skip >= productCount)  throw new BadUserRequestError('This page does not exist');
+      }
+
+      const vendors = await query
     if(vendors.length < 1) throw new NotFoundError(`No vendor available. Please check back later`)
     res.status(200).json({
       status: "Success",
