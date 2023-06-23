@@ -8,6 +8,7 @@ const router = Router()
 router.post("/add", userAuthMiddleWare, tryCatchHandler(CartController.addToCart));
 router.post("/applydiscount", userAuthMiddleWare, tryCatchHandler(CartController.applyDiscount));
 router.get("/", userAuthMiddleWare, tryCatchHandler(CartController.getUserCart));
+router.delete("/:productId", userAuthMiddleWare, tryCatchHandler(CartController.removeFromCart));
 router.delete("/", userAuthMiddleWare, tryCatchHandler(CartController.emptyCart));
 
 
