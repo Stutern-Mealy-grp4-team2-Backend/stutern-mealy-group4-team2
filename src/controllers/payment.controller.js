@@ -4,15 +4,37 @@ import { config } from "../config/index.js"
 import Stripe from "stripe";
 const stripe = Stripe(config.stripe_secret_keys)
 
-router.post("/payment",(req,res) =>{
+//checkout route
+router.get("/checkout",(req,res) =>{
+    if(!req.session.cart){
+        throw new UnauthorizedError("Access denied")
+    }
+    const cart = new Cart(req.session.cart)
+    res.status(201).json({total:cart.totalPrice})
+})
+//payment route
+router.post("/payment",async (req,res) =>{
+    if(!req.session.cart){
+        throw new UnauthorizedError("Access denied")
+    }
+    const cart = new Cart(req.session.cart)
         stripe.charges.create({
-            source: req.body.tokenId,
-            amount:req.body.amount,
+            source: req.body.stripeTokenId,
+            amount:cart.totalPrice*100,
             currency:'usd'
-        },(stripeErr,stripeRes) => {
+        },async (stripeErr,stripeRes) => {
             if(stripeErr){
                 res.status(500).json(stripeErr)
             }else{
+                const order = new Order({
+                    user:req.user.jwtId,
+                    cart:cart,
+                    address:req.body.address,//from the request body of the stripe
+                    name:req.body.name,//from the request body of the stripe
+                    paymentId:stripeRes.id
+                })
+                await order.save()
+                req.session.cart = null;
                 res.status(200).json(stripeRes)
             }
         })

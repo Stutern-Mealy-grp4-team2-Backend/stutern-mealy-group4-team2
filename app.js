@@ -30,10 +30,21 @@ const app = express()
 
 // Enable CORS for all routes
 app.use(cors());
-
+// create session store
+const store = MongoStore.create({
+  mongoUrl:process.env.MONGODB_CONNECTION_URL
+});
+//use session
+app.use(session({
+  secret:'restaurantApp',
+  resave:false,
+  saveUninitialized:true,
+  store:store,
+  cookie:{maxAge: 360*60*1000}
+}))
 // Initialize Passport.js middleware
 app.use(passport.initialize());
-
+app.use(passport.session())
 // Use the authentication routes
 
 
@@ -56,7 +67,11 @@ app.use(express.static(path.join(__dirname, 'profile')));
 
 //cookie parser middleware
 app.use(cookieParser())
-
+//session in routes
+app.use(function(req,res,next){
+  res.locals.session = req.session
+  next()
+})
 // Routes 
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/user', userRouter)
