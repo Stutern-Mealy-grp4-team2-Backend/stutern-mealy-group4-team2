@@ -26,7 +26,7 @@ const orderSchema = new Schema({
             }
           // ],
         ],
-    address:{type:String, required: true},
+    DeliveryAddress:{type:String, required: true},
     paymentMethod:{
         type:String, 
         required: true
@@ -40,6 +40,10 @@ const orderSchema = new Schema({
         status:{type:String},
         update_time:{type:String},
         email_address:{type:String},
+    },
+    shippingFee:{
+        type:Number,
+        default:500
     },
     totalPrice:{
         type:Number,

@@ -13,6 +13,7 @@ import { router as profileRouter } from "./src/routers/profile.route.js"
 import path from "path";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';;
+import { router as categoryRouter } from "./src/routers/category.route.js"
 
 import { router as orderRouter } from "./src/routers/order.route.js"
 import { router as cartRouter } from "./src/routers/cart.route.js"
@@ -59,9 +60,14 @@ app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/user', userRouter)
 app.use('/api/v1/vendor', vendorRouter)
 app.use('/api/v1/product', productRouter)
+
 app.use('/api/v1/order', orderRouter)
 app.use('/api/v1/cart', cartRouter)
 app.use('/api/v1/payment', stripeCheckoutRouter)
+
+app.use('/api/v1/reviews', reviewRouter)
+app.use('/api/v1/profile', profileRouter)
+app.use('/api/v1/categories', categoryRouter)
 
 
 

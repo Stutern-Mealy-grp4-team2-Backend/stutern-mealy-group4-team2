@@ -44,7 +44,7 @@ export default class UserController {
       password: hashedPassword,
       receivePromotionalEmails,
       verifyEmailToken,
-      verifyEmailTokenExpire: Date.now() + config.token_expiry,
+      verifyEmailTokenExpire: Date.now() + parseInt(config.token_expiry),
       });
       
      await user.save()
@@ -335,6 +335,7 @@ export default class UserController {
       if(file.size > config.max_file_upload) throw new BadUserRequestError(`Please upload an image less than ${config.max_file_upload}`);
       // Create a custom filename
       file.name = `photo_${userId}${path.parse(file.name).ext}`;
+      // file.name = `photo_${Date.now()}${Math.round(Math.random() * 1E9)}${path.parse(file.name).ext}`;
       
       file.mv(`${config.file_upload_path}/${file.name}`, async err => {
         if(err) {
