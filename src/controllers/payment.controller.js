@@ -29,9 +29,17 @@ router.post("/payment",async (req,res) =>{
                 const order = new Order({
                     user:req.user.jwtId,
                     cart:cart,
-                    address:req.body.address,//from the request body of the stripe
+                    deliaddress:req.body.address,//from the request body of the stripe
                     name:req.body.name,//from the request body of the stripe
-                    paymentId:stripeRes.id
+                    paymentResult:{
+                        id:req.body.stripeRes.id,
+                        status:{type:String},
+                        update_time:Date.now(),
+                        email_address:req.body.email_address
+                    },
+                    DeliveryAddress:req.body.address,
+                    isPaid:Date.now(),
+                    paymentMethod:req.body.paymentMethod
                 })
                 await order.save()
                 req.session.cart = null;

@@ -4,6 +4,8 @@ import passport from 'passport';
 import mongoose from "mongoose";
 import fileupload from "express-fileupload";
 import morgan from "morgan";
+import session from "express-session";
+import MongoStore from "connect-mongo";
 import { router as userRouter } from "./src/routers/user.route.js"
 import { router as vendorRouter } from "./src/routers/vendor.route.js"
 import { router as authRouter } from "./src/routers/auth.route.js"
@@ -32,11 +34,11 @@ const app = express()
 app.use(cors());
 // create session store
 const store = MongoStore.create({
-  mongoUrl:process.env.MONGODB_CONNECTION_URL
+  mongoUrl:config.mongodb_connection_url
 });
 //use session
 app.use(session({
-  secret:'restaurantApp',
+  secret:'grp4Team2',
   resave:false,
   saveUninitialized:true,
   store:store,

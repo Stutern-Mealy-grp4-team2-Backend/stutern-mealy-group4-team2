@@ -7,33 +7,11 @@ const orderSchema = new Schema({
         required: true,
         ref:"User"
     },
-    orderItems:[
-        // product:{
-        //     type:String, 
-        //     required: true,
-        //     ref:"Product"
-        // }
-        //products:[
-            {
-                productId:{
-                    type:mongoose.Schema.Types.ObjectId ,
-                    ref:"Product"
-                },
-                quantity:{
-                    type: Number,
-                    default:0
-                }
-            }
-          // ],
-        ],
+    cart:{type:Object, required: true},
     DeliveryAddress:{type:String, required: true},
     paymentMethod:{
         type:String, 
         required: true
-    },
-    isPending:{
-        type:Boolean,
-        default:true
     },
     paymentResult:{
         id:{type:String},
@@ -70,12 +48,10 @@ const orderSchema = new Schema({
         lat:{
             type: Number,
             default:0,
-            required: true
         },
         long:{
             type: Number,
             default:0,
-            required: true
         }
     }
     ]
