@@ -6,6 +6,7 @@ import {config} from "../config/index.js"
 import { sendEmail } from "../utils/sendEmail.js"
 import { generateToken, refreshToken } from "../utils/jwt.utils.js"
 import path from "path";
+import jwt, { verify } from "jsonwebtoken"
 
 
 
@@ -44,7 +45,7 @@ export default class UserController {
       password: hashedPassword,
       receivePromotionalEmails,
       verifyEmailToken,
-      verifyEmailTokenExpire: Date.now() + config.token_expiry,
+      verifyEmailTokenExpire: Date.now() + parseInt(config.token_expiry),
       });
       
      await user.save()
@@ -59,8 +60,8 @@ export default class UserController {
         if(mailSent === false) throw new NotFoundError(`${email} cannot be verified. Please provide a valid email address`)
         res.status(200).json({
           status: 'Success',
-          message: `An email verification link has been sent to ${email}.`,
-          message
+          message: `An email verification code has been sent to ${email}.`,
+          // message
         })
     }
     
@@ -84,9 +85,9 @@ export default class UserController {
       user.refreshToken = refresh
       await user.save()
       const userData = user.toObject();
-      delete userData._id;
+      // delete userData._id;
       delete userData.password;
-      const maxAge = parseInt(config.cookie_max_age);
+      const maxAge = config.cookie_max_age;
       res.cookie("refresh_token", refresh, { 
       httpOnly: true,
       secure: true,
@@ -121,9 +122,9 @@ export default class UserController {
       user.refreshToken = refresh
       await user.save()
       const userData = user.toObject();
-      delete userData._id;
+      // delete userData._id;
       delete userData.password;
-      const maxAge = parseInt(config.cookie_max_age);
+      const maxAge = config.cookie_max_age;
       res.cookie("refresh_token", refresh, { 
       httpOnly: true,
       secure: true,
@@ -165,8 +166,8 @@ export default class UserController {
 
         res.status(200).json({
           status: 'Success',
-          message: `A password reset link has been sent to ${email}`,
-          message
+          message: `An email verification code has been sent to ${email}`,
+          // message
         })
 
     }
@@ -207,7 +208,7 @@ export default class UserController {
       const userData = user.toObject();
       delete userData._id;
       delete userData.password;
-      const maxAge = parseInt(config.cookie_max_age);
+      const maxAge = config.cookie_max_age;
       res.cookie("refresh_token", refresh, { 
       httpOnly: true,
       secure: true,
@@ -225,22 +226,24 @@ export default class UserController {
     }
 
       //refresh token handler
-  static async refresh (req,res){
+  static async refresh (req, res){
     //access cookie to cookies
     const cookies = req.cookies
     //check if cookies exist
-    if(!cookies?.refresh_token) return res.status(401).json({
-      status:"Failed",
-      message:err.message
-    })
+    if(!cookies?.refresh_token) throw new UnAuthorizedError('No Refresh Token in Cookies')
     const refreshTokenCookie = cookies.refresh_token
     //find from record the cookie user
     const foundUser = await User.findOne({refreshToken:refreshTokenCookie})
-    if (!foundUser) return res.sendStatus(403)
-    jwt.verify(refreshTokenCookie, config.refresh_secret_key,(err,decoded) => {
-        if(err || foundUser._id !== decoded.payload._id) return res.status(403)
+    if (!foundUser) throw new NotFoundError('User not found')
+    jwt.verify(refreshTokenCookie, config.refresh_secret_key,(err, decoded) => {
+        if(err || foundUser._id.toString() !== decoded._id) {
+          console.log(decoded); // Log the decoded object
+          throw new UnAuthorizedError('There is something wrong with the Refresh token');
+        }
         const token = generateToken(foundUser)
-        res.status(201).json(token)
+        res.status(201).json({
+          access_token: token
+        })
     })
   }
 
@@ -250,7 +253,7 @@ export default class UserController {
     //access cookie to cookies
     const cookies = req.cookies;
     //check if cookies exist
-    if(!cookies?.refresh_token) return res.sendStatus(204) //no content
+    if(!cookies?.refresh_token) throw new UnAuthorizedError('No Refresh Token in Cookies')
     //if there is a cookie in the req
     const refreshTokenCookie = cookies.refresh_token
     //find from db if there is refresh token
@@ -265,7 +268,7 @@ export default class UserController {
     await foundUser.save()
     res.clearCookie("refresh_token",{httpOnly: true, maxAge: config.cookie_max_age})
     res.status(200).json({
-    status: 'status',
+    status: 'Success',
     message:"Logout successful"
   })
   }
