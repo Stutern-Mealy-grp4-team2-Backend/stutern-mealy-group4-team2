@@ -16,6 +16,7 @@ static async addCart(req,res){
   console.log("cart",cart)
   console.log("product",product)
   cart.add(product, product._id)
+  cart.addShippingFee(1000)
   req.session.cart = cart;
   console.log("session",req.session.cart)
   res.status(201).json("cart add to session")

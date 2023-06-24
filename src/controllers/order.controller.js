@@ -11,10 +11,7 @@ export default class OrderController {
     static async getMealOrder (req,res) {
         const {orderId} = req.params
     try{
-        const order = await Order.findById({_id: orderId}).populate(//populate is used to reference a "ref"
-            "user", //user is from the user ref in order model
-            "username email" //name and email are from the user model
-        )
+        const order = await Order.findById({_id: orderId})
         if(order){
             res.status(201).json(order)
         }else{
@@ -24,21 +21,6 @@ export default class OrderController {
         res.status(500).json({message:err.message})
     }
     }
-
-    //user login to get meal orders
-    static async loginMealOrder (req,res) {
-        try{
-        const order = await Order.find({user: req.user._id})/*.sort({_id: -1})*/
-        if(order){
-            res.status(201).json(order)
-        }else{
-            throw new UnAuthorizedError("Order not found")
-        }
-    }catch(err){
-        res.status(500).json({message:err.message})
-    }
-    }
-
     //get preference meal order
     static async preferOrder (req,res) {
         const {isPaid,isDelivered,location} = req.query
@@ -82,8 +64,7 @@ export default class OrderController {
 //get a meal order
   static async getMealOrder (req, res) {
     try {
-      const order = await Order.findById(req.params.id).populate('user', 'name email');
-  
+      const order = await Order.findById(req.params.id);
       if (order) {
         res.json(order);
       } else {
@@ -112,7 +93,7 @@ static async updateDelivery  (req, res) {
       res.status(400).json({ message: error.message });
     }
   }
-  //get all meal order
+  //get all user order
   static async getAllOrder (req,res){
     try{
         const orders = await Order.find({user:req.user.jwtId})

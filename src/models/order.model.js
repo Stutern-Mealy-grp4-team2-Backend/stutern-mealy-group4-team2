@@ -30,7 +30,6 @@ const orderSchema = new Schema({
     },
     isPaid:{
         type:Boolean,
-        required: true,
         default:false
     },
     paidAt:{
@@ -38,10 +37,9 @@ const orderSchema = new Schema({
     },
     isDelivered:{
         type:Boolean,
-        required: true,
         default:false
     },
-    deliverdAt:{
+    delivereddAt:{
         type: Date
     },
     location:[{
