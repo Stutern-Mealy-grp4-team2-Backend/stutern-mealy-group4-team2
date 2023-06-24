@@ -60,7 +60,7 @@ export default class UserController {
         if(mailSent === false) throw new NotFoundError(`${email} cannot be verified. Please provide a valid email address`)
         res.status(200).json({
           status: 'Success',
-          message: `An email verification link has been sent to ${email}.`,
+          message: `An email verification code has been sent to ${email}.`,
           // message
         })
     }
