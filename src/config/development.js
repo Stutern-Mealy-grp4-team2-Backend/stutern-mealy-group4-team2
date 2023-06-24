@@ -25,5 +25,6 @@ export const development = {
   facebook_app_secret: process.env.DEV_FACEBOOK_APP_SECRET,
   facebook_callback_url: process.env.DEV_FACEBOOK_CALLBACK_URL,
   max_file_upload: process.env.DEV_MAX_FILE_UPLOAD,
-  file_upload_path: process.env.DEV_FILE_UPLOAD_PATH
+  file_upload_path: process.env.DEV_FILE_UPLOAD_PATH,
+  stripe_secret_key: process.env.DEV_STRIPE_SECRET_KEY
 }
