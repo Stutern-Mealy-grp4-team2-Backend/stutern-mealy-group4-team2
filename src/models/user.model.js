@@ -36,6 +36,25 @@ const UserSchema = new Schema({
     type:String,
     default:null
   },
+  cart:{
+    items:[
+      {
+          productId:{
+              type: Types.ObjectId,
+              ref:"Product"
+          },
+          quantity:{
+              type: Number,
+              default:0
+          }
+      },
+     ],
+     totalPrice:{
+      type:Number,
+      required: true,
+      default:0
+    }
+  },
   verifyEmailToken: String,
   verifyEmailTokenExpire: Date,
   resetPasswordToken: String,
@@ -86,4 +105,5 @@ UserSchema.index({ location: '2dsphere' });
 
 
 export default model('User', UserSchema)
+
 
