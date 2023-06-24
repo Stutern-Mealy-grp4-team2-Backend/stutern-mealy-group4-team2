@@ -10,8 +10,9 @@ const OrderSchema = new Schema({
     deliveryAddress: {
     type: String,
     min: [5, 'Address must contain at least 5 characters long'],
-    required: [true, 'Please add a valid address']
+    // required: [true, 'Please add a valid address']
     },
+    scheduledDeliveryTime: Date,
 
     product: {
     type: Types.ObjectId,
@@ -22,6 +23,15 @@ const OrderSchema = new Schema({
         enum: ['pending', 'processing', 'cancelled', 'cash on delievery', 'dispatched', 'completed'],
         default: 'pending'
     },
+    isDelivered: {
+        type: Boolean,
+        default: false,
+    },
+    isPaid: {
+        type: Boolean,
+        default: false,
+    },
+    paidAt: Date,
     orderedBy: {
         type: Types.ObjectId,
         ref: 'User',
@@ -31,10 +41,13 @@ const OrderSchema = new Schema({
     phone: {
     type: String,
     unique: true,
-    required: [true, 'Please add a valid phone']
+    // required: [true, 'Please add a valid phone']
     },
     notes: String,
-    paymentMethod: {},
+    paymentMethod: {
+        type: String,
+        default: 'online'
+    },
     
 }, {
     timestamps: true

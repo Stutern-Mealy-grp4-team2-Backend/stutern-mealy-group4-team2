@@ -267,8 +267,4 @@ export default class CartController {
         })
     }
 
-    static async createOrder(req, res ) {
-        const { discountCode } = req.body;
-        
-    }
 }
