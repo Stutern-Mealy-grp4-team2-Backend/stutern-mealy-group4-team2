@@ -61,7 +61,7 @@ export default class UserController {
         res.status(200).json({
           status: 'Success',
           message: `An email verification link has been sent to ${email}.`,
-          message
+          // message
         })
     }
     
@@ -85,7 +85,7 @@ export default class UserController {
       user.refreshToken = refresh
       await user.save()
       const userData = user.toObject();
-      delete userData._id;
+      // delete userData._id;
       delete userData.password;
       const maxAge = config.cookie_max_age;
       res.cookie("refresh_token", refresh, { 
@@ -166,8 +166,8 @@ export default class UserController {
 
         res.status(200).json({
           status: 'Success',
-          message: `A password reset link has been sent to ${email}`,
-          message
+          message: `An email verification code has been sent to ${email}`,
+          // message
         })
 
     }
