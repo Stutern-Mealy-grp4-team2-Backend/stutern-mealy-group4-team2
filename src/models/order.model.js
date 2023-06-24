@@ -6,7 +6,7 @@ const OrderSchema = new Schema({
         ref: 'Cart',
         required: true
     }],
-    
+    deliveryName: String,
     deliveryAddress: {
     type: String,
     min: [5, 'Address must contain at least 5 characters long'],

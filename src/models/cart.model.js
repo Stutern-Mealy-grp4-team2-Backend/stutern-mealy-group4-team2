@@ -12,6 +12,7 @@ const CartSchema = new Schema({
       type: Types.ObjectId,
       ref: 'Product'
     },
+    cartPrice: Number,
     price: Number,
   },
 ],
