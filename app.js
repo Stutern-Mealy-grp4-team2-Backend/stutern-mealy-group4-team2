@@ -52,7 +52,7 @@ app.use(cookieParser())
 // For file uploads
 app.use(fileupload())
 // Set static folder
-app.use(express.static(path.join(__dirname, 'profile')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 
 // Routes 

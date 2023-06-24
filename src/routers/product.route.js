@@ -6,6 +6,7 @@ import { tryCatchHandler } from '../utils/tryCatch.handler.js'
 const router = Router()
 
 router.post("/create", tryCatchHandler(ProductController.createProduct) )
+router.post("/:productId", tryCatchHandler(ProductController.uploadPhoto) )
 router.get("/all", tryCatchHandler(ProductController.getAllProducts) )
 router.get("/", tryCatchHandler(ProductController.searchProduct) )
 router.get("/category", tryCatchHandler(ProductController.searchProductsByCategory) )
