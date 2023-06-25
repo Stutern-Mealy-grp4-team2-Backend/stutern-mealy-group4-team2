@@ -1,6 +1,14 @@
 import dotenv from "dotenv"
 dotenv.config()
 
+import cloudinary from "cloudinary";
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
 
 export const development = {
   mongodb_connection_url: process.env.DEV_MONGODB_CONNECTION_URL,
