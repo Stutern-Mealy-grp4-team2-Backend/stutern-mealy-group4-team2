@@ -20,8 +20,9 @@ export default function Cart(oldCart) {
   this.addShippingFee = function (shippingFee) {
     const shippingId = 'shipping'; // Use a unique ID for the shipping fee item
     if (!this.items[shippingId]) {
-      this.items[shippingId] = { item: { name: 'Shipping Fee', price: shippingFee }, quantity: 1, price: shippingFee };
-      this.totalQuantity++;
+      this.items[shippingId] = { item: { name: 'Shipping Fee', price: shippingFee }, quantity: 0, price: shippingFee };
+      //this.totalQuantity++;
+      this.totalQuantity;
       this.totalPrice += shippingFee;
     }
   };
