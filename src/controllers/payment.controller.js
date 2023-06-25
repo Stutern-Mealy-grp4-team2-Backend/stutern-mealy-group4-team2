@@ -2,12 +2,15 @@ import express from "express"
 const router = express.Router()
 import { config } from "../config/index.js"
 import Stripe from "stripe";
+import { UnAuthorizedError } from "../errors/error.js";
+import Cart from "../models/cart.model.js";
+import Order from "../models/order.model.js";
 const stripe = Stripe(config.stripe_secret_keys)
 
 //checkout route
 router.get("/checkout",(req,res) =>{
     if(!req.session.cart){
-        throw new UnauthorizedError("Access denied")
+        throw new UnAuthorizedError("Access denied")
     }
     const cart = new Cart(req.session.cart)
     res.status(201).json({total:cart.totalPrice})
@@ -15,7 +18,7 @@ router.get("/checkout",(req,res) =>{
 //payment route
 router.post("/payment",async (req,res) =>{
     if(!req.session.cart){
-        throw new UnauthorizedError("Access denied")
+        throw new UnAuthorizedError("Access denied")
     }
     const cart = new Cart(req.session.cart)
         stripe.charges.create({
@@ -29,7 +32,6 @@ router.post("/payment",async (req,res) =>{
                 const order = new Order({
                     user:req.user.jwtId,
                     cart:cart,
-                    deliaddress:req.body.address,//from the request body of the stripe
                     name:req.body.name,//from the request body of the stripe
                     paymentResult:{
                         id:req.body.stripeRes.id,
@@ -37,7 +39,7 @@ router.post("/payment",async (req,res) =>{
                         update_time:Date.now(),
                         email_address:req.body.email_address
                     },
-                    DeliveryAddress:req.body.address,
+                    deliveryAddress:req.body.address,
                     isPaid:Date.now(),
                     paymentMethod:req.body.paymentMethod
                 })
