@@ -22,7 +22,7 @@ router.post("/payment",async (req,res) =>{
     }
     const cart = new Cart(req.session.cart)
         stripe.charges.create({
-            source: req.body.stripeTokenId,
+            source: req.body.id,
             amount:cart.totalPrice*100,
             currency:'usd'
         },async (stripeErr,stripeRes) => {
@@ -35,13 +35,13 @@ router.post("/payment",async (req,res) =>{
                     name:req.body.name,//from the request body of the stripe
                     paymentResult:{
                         id:req.body.stripeRes.id,
-                        status:{type:String},
+                        status:true,
                         update_time:Date.now(),
-                        email_address:req.body.email_address
+                        email_address:req.body.email
                     },
                     deliveryAddress:req.body.address,
                     isPaid:Date.now(),
-                    paymentMethod:req.body.paymentMethod
+                    paymentMethod:req.body.type
                 })
                 await order.save()
                 req.session.cart = null;

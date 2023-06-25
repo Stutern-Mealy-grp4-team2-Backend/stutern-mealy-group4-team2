@@ -8,7 +8,7 @@ const orderSchema = new Schema({
         ref:"User"
     },
     cart:{type:Object, required: true},
-    DeliveryAddress:{type:String, required: true},
+    DeliveryAddress:{type:String},
     paymentMethod:{
         type:String, 
         required: true
@@ -25,7 +25,7 @@ const orderSchema = new Schema({
     },
     totalPrice:{
         type:Number,
-        required: true,
+        //required: true,
         default:0.0
     },
     isPaid:{
@@ -39,7 +39,7 @@ const orderSchema = new Schema({
         type:Boolean,
         default:false
     },
-    delivereddAt:{
+    deliveredAt:{
         type: Date
     },
     location:[{
