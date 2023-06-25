@@ -135,74 +135,74 @@ export default class ProductController {
       });
     }
     
-    // static async productPhotoUpload(req, res, next) {
-    //   const Id = req.params.productId;     
-    //   // Fetch the user from the database
-    //   const product = await Product.findById(Id);
-    //   if(!product) throw new BadUserRequestError('Please provide a valid Product ID');
-    //   // Update the personal information
-    //   if(!req.files) throw new BadUserRequestError('Please upload a product photo');
-    //   const file = req.files.file;
-    //   if(!file.mimetype.startsWith('image')) throw new BadUserRequestError('Please upload the required format');
-    //   // Check file size
-    //   if(file.size > config.max_file_upload) throw new BadUserRequestError(`Please upload an image less than ${config.max_file_upload}`);
-    //   // Create a custom filename
-    //   file.name = `photo_${Id}${path.parse(file.name).ext}`;
-      
-    //   file.mv(`${config.file_upload_path}/${file.name}`, async err => {
-    //     if(err) {
-    //       console.error(err);
-    //       return next(new FailedRequestError('Problem with file upload'))
-    //     }
-    //     await Product.findByIdAndUpdate(Id, { imageUrl: file.name })
-
-    //     res.status(200).json({
-    //     status: "Success",
-    //     message: "Product photo updated successfully",
-    //     data: file.name,
-    //   })
-    //   })
-      
-    // }
-
     static async uploadPhoto(req, res, next) {
-      const productId = req.params.productId;
-    
-      // Fetch the product from the database
-      const product = await Product.findById(productId);
-      if (!product) {
-        throw new BadUserRequestError('Please provide a valid Product ID');
-      }
-    
-      // Check if a file was uploaded
-      if (!req.files || !req.files.file) {
-        throw new BadUserRequestError('Please upload a product photo');
-      }
-    
+      const Id = req.params.productId;     
+      // Fetch the user from the database
+      const product = await Product.findById(Id);
+      if(!product) throw new BadUserRequestError('Please provide a valid Product ID');
+      // Update the personal information
+      if(!req.files) throw new BadUserRequestError('Please upload a product photo');
       const file = req.files.file;
-    
-      try {
-        // Upload the file to Cloudinary
-        const result = await cloudinary.uploader.upload(file.tempFilePath);
-        console.log(result)
-    
-        // Update the product with the Cloudinary image URL
-        await Product.findByIdAndUpdate(productId, { imageUrl: result.secure_url });
-    
-        // Return the response
+      if(!file.mimetype.startsWith('image')) throw new BadUserRequestError('Please upload the required format');
+      // Check file size
+      if(file.size > config.max_file_upload) throw new BadUserRequestError(`Please upload an image less than ${config.max_file_upload}`);
+      // Create a custom filename
+      file.name = `photo_${Id}${path.parse(file.name).ext}`;
+      
+      file.mv(`${config.file_upload_path}/${file.name}`, async err => {
+        if(err) {
+          console.error(err);
+          return next(new FailedRequestError('Problem with file upload'))
+        }
+        await Product.findByIdAndUpdate(Id, { imageUrl: file.name })
+
         res.status(200).json({
-          status: 'Success',
-          message: 'Product photo uploaded successfully',
-          data: {
-            imageUrl: result.secure_url
-          }
-        });
-      } catch (error) {
-        // Handle the upload error
-        console.error(error);
-        next(new FailedRequestError('Problem with file upload'));
-      }
+        status: "Success",
+        message: "Product photo updated successfully",
+        data: file.name,
+      })
+      })
+      
     }
+
+    // static async uploadPhoto(req, res, next) {
+    //   const productId = req.params.productId;
+    
+    //   // Fetch the product from the database
+    //   const product = await Product.findById(productId);
+    //   if (!product) {
+    //     throw new BadUserRequestError('Please provide a valid Product ID');
+    //   }
+    
+    //   // Check if a file was uploaded
+    //   if (!req.files || !req.files.file) {
+    //     throw new BadUserRequestError('Please upload a product photo');
+    //   }
+    
+    //   const file = req.files.file;
+    
+    //   try {
+    //     // Upload the file to Cloudinary
+    //     const result = await cloudinary.uploader.upload(file.tempFilePath);
+    //     console.log(result)
+    
+    //     // Update the product with the Cloudinary image URL
+    //     await Product.findByIdAndUpdate(productId, { imageUrl: result.secure_url });
+    
+    //     // Return the response
+    //     res.status(200).json({
+    //       status: 'Success',
+    //       message: 'Product photo uploaded successfully',
+    //       data: {
+    //         imageUrl: result.secure_url
+    //       }
+    //     });
+    //   } catch (error) {
+    //     // Handle the upload error
+    //     console.error(error);
+    //     next(new FailedRequestError('Problem with file upload'));
+    //   }
+    // }
 
     static async deleteAllProducts (req, res) {
       const products = await Product.find()
