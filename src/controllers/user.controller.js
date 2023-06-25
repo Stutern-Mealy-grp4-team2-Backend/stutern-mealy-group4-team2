@@ -1,10 +1,12 @@
 import { createUserValidator, loginUserValidator, resetPasswordValidator } from "../validators/user.validator.js"
-import { BadUserRequestError, NotFoundError, UnAuthorizedError } from "../errors/error.js"
+import { BadUserRequestError, NotFoundError, UnAuthorizedError, FailedRequestError } from "../errors/error.js"
 import User from "../models/user.model.js"
 import bcrypt from "bcrypt"
 import {config} from "../config/index.js"
 import { sendEmail } from "../utils/sendEmail.js"
 import { generateToken, refreshToken } from "../utils/jwt.utils.js"
+import path from "path";
+import jwt, { verify } from "jsonwebtoken"
 
 
 
@@ -29,7 +31,7 @@ export default class UserController {
       } else {
       throw new BadUserRequestError(`Please log in to ${email} to get your verification link.`);
       }
-}
+    }
       // Generate verification token
       const saltRounds = config.bycrypt_salt_round
       // Create verification token
@@ -43,7 +45,7 @@ export default class UserController {
       password: hashedPassword,
       receivePromotionalEmails,
       verifyEmailToken,
-      verifyEmailTokenExpire: Date.now() + config.token_expiry,
+      verifyEmailTokenExpire: Date.now() + parseInt(config.token_expiry),
       });
       
      await user.save()
@@ -58,8 +60,8 @@ export default class UserController {
         if(mailSent === false) throw new NotFoundError(`${email} cannot be verified. Please provide a valid email address`)
         res.status(200).json({
           status: 'Success',
-          message: `An email verification link has been sent to ${email}.`,
-          message
+          message: `An email verification code has been sent to ${email}.`,
+          // message
         })
     }
     
@@ -82,7 +84,10 @@ export default class UserController {
       // console.log(refresh)
       user.refreshToken = refresh
       await user.save()
-      const maxAge = parseInt(config.cookie_max_age);
+      const userData = user.toObject();
+      // delete userData._id;
+      delete userData.password;
+      const maxAge = config.cookie_max_age;
       res.cookie("refresh_token", refresh, { 
       httpOnly: true,
       secure: true,
@@ -93,9 +98,8 @@ export default class UserController {
       status: "Success",
       message: 'Account activated successfully.',
       data: {
-        name: user.name,
-        email: user.email,
-        access_token: token,
+        user: userData,
+        access_token: token
       },
       })
     }
@@ -117,24 +121,24 @@ export default class UserController {
       // console.log(refresh)
       user.refreshToken = refresh
       await user.save()
-      const maxAge = parseInt(config.cookie_max_age);
+      const userData = user.toObject();
+      // delete userData._id;
+      delete userData.password;
+      const maxAge = config.cookie_max_age;
       res.cookie("refresh_token", refresh, { 
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge 
+      maxAge
     });
 
       res.status(200).json({
         status: "Success",
         message: "Login successful",
         data: {
-          user: {
-            name: user.name,
-            email: user.email,
-          },
-          access_token: token,
-        }
+          user: userData,
+          access_token: token
+        },
       })
     }
 
@@ -162,8 +166,8 @@ export default class UserController {
 
         res.status(200).json({
           status: 'Success',
-          message: `A password reset link has been sent to ${email}`,
-          message
+          message: `An email verification code has been sent to ${email}`,
+          // message
         })
 
     }
@@ -201,7 +205,10 @@ export default class UserController {
       user.resetPasswordExpire = undefined;
       user.refreshToken = refresh
       await user.save();
-      const maxAge = parseInt(config.cookie_max_age);
+      const userData = user.toObject();
+      delete userData._id;
+      delete userData.password;
+      const maxAge = config.cookie_max_age;
       res.cookie("refresh_token", refresh, { 
       httpOnly: true,
       secure: true,
@@ -212,30 +219,31 @@ export default class UserController {
         status: "Success",
         message: "Password updated successfully",
         data: {
-          name: user.name,
-          email: user.email,
+          user: userData,
           access_token: token
         },
       });
     }
 
       //refresh token handler
-  static async refresh (req,res){
+  static async refresh (req, res){
     //access cookie to cookies
     const cookies = req.cookies
     //check if cookies exist
-    if(!cookies?.refresh_token) return res.status(401).json({
-      status:"Failed",
-      message:err.message
-    })
+    if(!cookies?.refresh_token) throw new UnAuthorizedError('No Refresh Token in Cookies')
     const refreshTokenCookie = cookies.refresh_token
     //find from record the cookie user
     const foundUser = await User.findOne({refreshToken:refreshTokenCookie})
-    if (!foundUser) return res.sendStatus(403)
-    jwt.verify(refreshTokenCookie,config.refresh_secret_key,(err,decoded) => {
-        if(err || foundUser._id !== decoded.payload._id) return res.status(403)
+    if (!foundUser) throw new NotFoundError('User not found')
+    jwt.verify(refreshTokenCookie, config.refresh_secret_key,(err, decoded) => {
+        if(err || foundUser._id.toString() !== decoded._id) {
+          console.log(decoded); // Log the decoded object
+          throw new UnAuthorizedError('There is something wrong with the Refresh token');
+        }
         const token = generateToken(foundUser)
-        res.status(201).json(token)
+        res.status(201).json({
+          access_token: token
+        })
     })
   }
 
@@ -245,7 +253,7 @@ export default class UserController {
     //access cookie to cookies
     const cookies = req.cookies;
     //check if cookies exist
-    if(!cookies?.refresh_token) return res.sendStatus(204) //no content
+    if(!cookies?.refresh_token) throw new UnAuthorizedError('No Refresh Token in Cookies')
     //if there is a cookie in the req
     const refreshTokenCookie = cookies.refresh_token
     //find from db if there is refresh token
@@ -260,9 +268,92 @@ export default class UserController {
     await foundUser.save()
     res.clearCookie("refresh_token",{httpOnly: true, maxAge: config.cookie_max_age})
     res.status(200).json({
-    status: 'status',
+    status: 'Success',
     message:"Logout successful"
   })
+  }
+
+  static async getProfile(req, res,) {
+        const userId = req.user._id;
+        // Fetch the user from the database
+        const user = await User.findById(userId).select('-_id');
+        res.status(200).json({
+        status: "Success",
+        data: user,
+        })
+    }
+
+    static async updatePersonalInfo(req, res,) {
+        const userId = req.user._id;
+        // if(!userId) throw new UnAuthorizedError('Not authorized')
+        const { phone, firstName, lastName } = req.body;
+        // Fetch the user from the database
+        const user = await User.findById(userId);
+        // Update the personal information
+        user.firstName = firstName;
+        user.lastName = lastName;
+        user.phone = phone;
+        const fullName = firstName + ' ' + lastName;
+        user.name = fullName;
+        await user.save();
+        const userData = user.toObject();
+        delete userData._id;
+        res.status(200).json({
+        status: "Success",
+        message: "Personal information updated successfully",
+        data: userData,
+        })
+    }
+
+     static async updateAddressInfo(req, res,) {
+        const userId = req.user._id;
+        // if(!userId) throw new UnAuthorizedError('Not authorized')
+        const { countryName,  cityAndState, numberAndStreet, postalCode } = req.body;
+        // Fetch the user from the database
+        const user = await User.findById(userId);
+        // Update the personal information
+        user.countryName = countryName;
+        user.cityAndState = cityAndState;
+        user.numberAndStreet = numberAndStreet;
+        user.postalCode = postalCode;
+        await user.save();
+        const userData = user.toObject();
+        delete userData._id;
+        res.status(200).json({
+        status: "Success",
+        message: "Address updated successfully",
+        data: userData,
+        })
+    }
+
+    static async profilePhotoUpload(req, res, next) {
+      const userId = req.user._id;     
+      // Fetch the user from the database
+      const user = await User.findById(userId);
+      // Update the personal information
+      if(!req.files) throw new BadUserRequestError('Please upload a profile photo');
+      const file = req.files.file;
+      if(!file.mimetype.startsWith('image')) throw new BadUserRequestError('Please upload the required format');
+      // Check file size
+      if(file.size > config.max_file_upload) throw new BadUserRequestError(`Please upload an image less than ${config.max_file_upload}`);
+      // Create a custom filename
+      file.name = `photo_${userId}${path.parse(file.name).ext}`;
+      // file.name = `photo_${Date.now()}${Math.round(Math.random() * 1E9)}${path.parse(file.name).ext}`;
+      
+      file.mv(`${config.file_upload_path}/${file.name}`, async err => {
+        if(err) {
+          console.error(err);
+          return next(new FailedRequestError('Problem with file upload'))
+        }
+        await User.findByIdAndUpdate(userId, { profilePhoto: file.name })
+
+        res.status(200).json({
+        status: "Success",
+        message: "Profile photo updated successfully",
+        data: file.name,
+      })
+      })
+      
   }
     
   static async findDevUser(req, res) {

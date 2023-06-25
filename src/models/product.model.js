@@ -1,8 +1,10 @@
 import { Schema, model, Types, Query }  from "mongoose";
+import slugify from "slugify";
 
 const ProductSchema = new Schema({
     name: {
         type: String,
+        trim: true,
         min: [2, 'Name must be at least 2 characters long'],
         required: [true, 'Please add a name']
     },
@@ -32,14 +34,16 @@ const ProductSchema = new Schema({
         default: 'no-photo.jpg'
     },
     vendor: {
-        type: Types.ObjectId,
-        ref: 'Vendor',
-        // required: true
+        type: String,
+        required: true
+    },
+    slug: {
+        type: String,
+        trim: true
     },
     category: {
         type: String,
-        enum: ['African', 'Drinks', 'Salad', 'Combo', 'Starters', 'Snacks'],
-        required: [true, 'Please add a valid category']
+        required: true,
     },
     ingredients:{
         type: String,
@@ -59,10 +63,9 @@ const ProductSchema = new Schema({
         type: Number,
         required: true
     },
-    reviews: {
-        type: Types.ObjectId,
-        ref: 'Review'
-    },
+    reviews: [{
+        type: String,
+    }],
     isDeleted: {
         type: Boolean,
         default: false,
@@ -83,11 +86,21 @@ const ProductSchema = new Schema({
         type: Date,
         default: Date.now
     }
+    
 
 }, {
     timestamps: true
 })
+ProductSchema.index({ name: 'text', vendor: 'text' });
 
+ProductSchema.pre('save', function (next) {
+    this.category = this.category.toLowerCase();
+    next();
+});
+ProductSchema.pre('save', function (next) {
+    this.slug = slugify(this.name, { lower: true });
+    next();
+});
 ProductSchema.pre(/^find/, function (next){
     if (this instanceof Query) {
         this.where({ isDeleted: { $ne: true } }); 
@@ -96,108 +109,4 @@ ProductSchema.pre(/^find/, function (next){
 });
 
 
-
 export default model("Product", ProductSchema)
-
-
-// const reviewSchema = new Schema({
-//     name:{
-//         type: String,
-//         required:[true,'Please provide a name']
-//     },
-//     rating:{
-//         type: String,
-//         required:true 
-//     },
-//     comment:{
-//         type: String,
-//         required:[true,'Please provide a comment']
-//     },
-//     user:{
-//         type: mongoose.Schema.Types.ObjectId,
-//         required:[true,'Please provide a name'],
-//         ref:"User"
-//     }
-// })
-
-// const restaurantSchema = new Schema({
-//     restaurant: {
-//         type: String,
-//         required: [true, 'Please provide a name']
-//     },
-//     food: [{
-//         name: {
-//             type: String,
-//             required: true
-//         },
-//         price: {
-//             type: Number,
-//             required: true
-//         }
-//     }],
-//     drink: [{
-//         name: {
-//             type: String,
-//             required: true
-//         },
-//         price: {
-//             type: Number,
-//             required: true
-//         }
-//     }],
-//     imageUrl: {
-//         type: [String],
-//         required: true,
-//     },
-//     user: {
-//         type: mongoose.Schema.Types.ObjectId,
-//         required: [true, 'Please provide a name'],
-//         ref: "User"
-//     }
-// });
-
-
-// const productSchema = new Schema({
-//     name:[restaurantSchema],
-//     reviews:[reviewSchema],
-//     numReview:{
-//         type: Number,
-//         default: 0
-//     },
-//     description:{
-//         type: String,
-//         default:"Eating delicious balanced diet"
-//     },
-//     rating:{
-//         type: String,
-//         default:"3.5"
-//     },
-//     discount: {
-//         type: Number,
-//         default: 0
-//       },
-//     promoAvailable: {
-//         type: Boolean,
-//         default: false
-//       },
-//     featured:{
-//         type: Boolean,
-//         default: false
-//     }
-// },{
-//     timestamps:true
-// })
-
-// productSchema.methods.discountPrice = function(/*discountValue*/){
-//     const originalPrice = this.name.reduce((total,restaurant) => {
-//         const restaurantPrice = restaurant.food.reduce((subtotal, foodItem) => {
-//             return subtotal + foodItem.price
-//         })
-//         return total + restaurantPrice
-//     }, 0)
-//     const discountAmount = (this.discount/100)*originalPrice
-//     const discountedPrice = originalPrice - discountAmount
-//     return parseFloat(discountedPrice.toFixed(2))
-//     this.discount = discountValue
-//     return this.save()
-// }
