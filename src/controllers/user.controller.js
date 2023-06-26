@@ -7,7 +7,7 @@ import { sendEmail } from "../utils/sendEmail.js"
 import { generateToken, refreshToken } from "../utils/jwt.utils.js"
 import path from "path";
 import jwt, { verify } from "jsonwebtoken"
-
+import cloudinary from "cloudinary";
 
 
 
@@ -265,8 +265,9 @@ export default class UserController {
     }
     //delete the refresh token in the db
     foundUser.refreshToken = null
-    await foundUser.save()
     res.clearCookie("refresh_token",{httpOnly: true, maxAge: config.cookie_max_age})
+
+    await foundUser.save()
     res.status(200).json({
     status: 'Success',
     message:"Logout successful"
@@ -327,9 +328,10 @@ export default class UserController {
     }
 
     static async profilePhotoUpload(req, res, next) {
-      const userId = req.user._id;     
+      const userId = req.user;     
       // Fetch the user from the database
       const user = await User.findById(userId);
+      if(!user) throw new NotFoundError('User Not Found');
       // Update the personal information
       if(!req.files) throw new BadUserRequestError('Please upload a profile photo');
       const file = req.files.file;
@@ -340,19 +342,35 @@ export default class UserController {
       file.name = `photo_${userId}${path.parse(file.name).ext}`;
       // file.name = `photo_${Date.now()}${Math.round(Math.random() * 1E9)}${path.parse(file.name).ext}`;
       
-      file.mv(`${config.file_upload_path}/${file.name}`, async err => {
-        if(err) {
+      file.mv(`${config.file_upload_path}/${file.name}`, async (err) => {
+        if (err) {
           console.error(err);
-          return next(new FailedRequestError('Problem with file upload'))
+          return next(new FailedRequestError('Problem with file upload'));
         }
-        await User.findByIdAndUpdate(userId, { profilePhoto: file.name })
-
-        res.status(200).json({
-        status: "Success",
-        message: "Profile photo updated successfully",
-        data: file.name,
-      })
-      })
+    
+        // Upload image to Cloudinary
+        cloudinary.v2.uploader.upload(
+          `${config.file_upload_path}/${file.name}`,
+          { folder: "profile-photos" },
+          async (error, result) => {
+            if (error) {
+              console.error(error);
+              return next(new FailedRequestError('Failed to upload image to Cloudinary'));
+            }
+    
+            const imageUrl = result.secure_url;
+    
+            // Update the photo with the Cloudinary image URL
+            await User.findByIdAndUpdate(userId, { profilePhoto: file.name })
+    
+            res.status(200).json({
+              status: "Success",
+              message: "Profile photo updated successfully",
+              data: imageUrl
+            });
+          }
+        );
+      });
       
   }
     
