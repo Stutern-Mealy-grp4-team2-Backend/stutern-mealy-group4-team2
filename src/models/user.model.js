@@ -61,10 +61,10 @@ const UserSchema = new Schema({
     default: 'no-photo.jpg'
   },
 
-//   favourites: [{
-//     type: Types.ObjectId,
-//     ref: 'Product'
-//   }],
+  favourites: [{
+    type: Types.ObjectId,
+    ref: 'Product'
+  }],
   
 //   location: {
 //     type: {
