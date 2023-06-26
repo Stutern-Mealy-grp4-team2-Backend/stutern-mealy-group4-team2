@@ -248,30 +248,30 @@ export default class UserController {
   }
 
   //logout controller
-  static async logout (req,res){
-    //on the client delete the access token
-    //access cookie to cookies
+  static async logout(req, res) {
+    // Check if cookies exist
     const cookies = req.cookies;
-    //check if cookies exist
-    if(!cookies?.refresh_token) throw new UnAuthorizedError('No Refresh Token in Cookies')
-    //if there is a cookie in the req
-    const refreshTokenCookie = cookies.refresh_token
-    //find from db if there is refresh token
-    const foundUser = await User.findOne({refreshToken:refreshTokenCookie})
-    if(!foundUser) {
-    //clear the cookies the cookie though not found in the db
-    res.clearCookie("refresh_token",{httpOnly: true, maxAge: config.cookie_max_age})
-      return res.sendStatus(204) //successful but not content
+    if (!cookies?.refresh_token) {
+      throw new UnAuthorizedError('No Refresh Token in Cookies');
     }
-    //delete the refresh token in the db
-    foundUser.refreshToken = null
-    res.clearCookie("refresh_token",{httpOnly: true, maxAge: config.cookie_max_age})
 
-    await foundUser.save()
+    // Clear refresh token cookie
+    res.clearCookie('refresh_token', { httpOnly: true, maxAge: config.cookie_max_age });
+
+    // Find the user by refresh token
+    const foundUser = await User.findOne({ refreshToken: cookies.refresh_token });
+    if (!foundUser) {
+      return res.sendStatus(204); // Successful but no content
+    }
+
+    // Delete the refresh token in the database
+    foundUser.refreshToken = null;
+    await foundUser.save();
+
     res.status(200).json({
-    status: 'Success',
-    message:"Logout successful"
-  })
+      status: 'Success',
+      message: 'Logout successful',
+    });
   }
 
   static async getProfile(req, res,) {

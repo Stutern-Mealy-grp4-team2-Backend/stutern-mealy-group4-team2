@@ -5,10 +5,10 @@ import { userAuthMiddleWare } from "../middlewares/auth.middleware.js";
 
 const router = Router()
 
-router.post("/add", userAuthMiddleWare, tryCatchHandler(CartController.addToCart));
+router.post("/add/:productId/:quantity", userAuthMiddleWare, tryCatchHandler(CartController.addToCart));
 router.post("/applydiscount", userAuthMiddleWare, tryCatchHandler(CartController.applyDiscount));
 router.get("/", userAuthMiddleWare, tryCatchHandler(CartController.getUserCart));
-router.put("/:productId", userAuthMiddleWare, tryCatchHandler(CartController.removeFromCart));
+router.put("/:productId/:quantity", userAuthMiddleWare, tryCatchHandler(CartController.removeFromCart));
 router.delete("/:productId", userAuthMiddleWare, tryCatchHandler(CartController.deleteProductFromCart));
 router.delete("/", userAuthMiddleWare, tryCatchHandler(CartController.emptyCart));
 

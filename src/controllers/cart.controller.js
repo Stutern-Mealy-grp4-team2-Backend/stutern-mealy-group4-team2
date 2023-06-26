@@ -1,4 +1,4 @@
-import { BadUserRequestError, NotFoundError, UnAuthorizedError, FailedRequestError } from "../errors/error.js"
+import {  NotFoundError, UnAuthorizedError } from "../errors/error.js"
 import User from "../models/user.model.js"
 import Product from "../models/product.model.js"
 import Cart from "../models/cart.model.js"
@@ -6,157 +6,160 @@ import Discount from "../models/discount.model.js";
 
 
 export default class CartController {
-    static async addToCart(req, res) {
-        const { cart } = req.body;
-        const userId = req.user;
-        let products = [];
-        const user = await User.findById(userId);
-        if (!user) throw new NotFoundError('User not found');
-      
-        let cartToUpdate = await Cart.findOne({ orderedBy: userId });
-      
-        if (cartToUpdate) {
-          for (let i = 0; i < cart.length; i++) {
-            const existingProduct = cartToUpdate.products.find(
-              (product) => product.product.toString() === cart[i].productId
-            );
-      
-            if (existingProduct) {
-              existingProduct.quantity += parseInt(cart[i].quantity);
-              existingProduct.cartPrice = existingProduct.quantity * existingProduct.price;
-            } else {
-              const products = [];
-              const productId = cart[i].productId;
-                const quantity = cart[i].quantity;
-                const product = await Product.findById(productId).select('price');
-                const price = product.price;
-                const cartPrice = product.price * quantity;
-                products.push({
-                    product: productId,
-                    quantity,
-                    price,
-                    cartPrice,
-                });
-            }
-          }
-      
-          cartToUpdate.products = [...cartToUpdate.products, ...products];
-          let cartSubTotal = 0;
-          for (let i = 0; i < cartToUpdate.products.length; i++) {
-            cartSubTotal += cartToUpdate.products[i].price * cartToUpdate.products[i].quantity;
-          }
-          
-          let vatDeduction = cartSubTotal * 0.075;
-          let shippingFee = 250;
-          let cartTotal = cartSubTotal + vatDeduction + shippingFee;
-      
-          cartToUpdate.cartSubTotal = cartSubTotal;
-          cartToUpdate.vatDeduction = vatDeduction;
-          cartToUpdate.shippingFee = shippingFee;
-          cartToUpdate.cartTotal = cartTotal;
-      
-          let updatedCart = await cartToUpdate.save();
-      
-          res.status(200).json({
-            status: 'Success',
-            data: updatedCart,
-          });
-        } else {
-            // Create new cart
-            const products = [];
-            let cartSubTotal = 0;
-    
-            for (let i = 0; i < cart.length; i++) {
-                const productId = cart[i].productId;
-                const quantity = cart[i].quantity;
-                const product = await Product.findById(productId).select('price');
-                const price = product.price;
-                const cartPrice = price * quantity;
-                
-                products.push({
-                    product: productId,
-                    quantity,
-                    price,
-                    cartPrice,
-                });
-    
-                cartSubTotal += product.price * quantity;
-            }
-            
-            const vatDeduction = cartSubTotal * 0.075;
-            const shippingFee = 250;
-            const cartTotal = cartSubTotal + vatDeduction + shippingFee;
-    
-            const newCart = await Cart.create({
-                products,
-                cartSubTotal,
-                vatDeduction,
-                shippingFee,
-                cartTotal,
-                orderedBy: userId
-            });
-    
-            res.status(201).json({
-                status: 'Success',
-                data: newCart
-            });
-        }
+  static async addToCart(req, res) {
+    const { productId, quantity } = req.params;
+    const userId = req.user;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new NotFoundError('User not found');
     }
-    
-    static async removeFromCart(req, res) {
-        const { cart } = req.body;
-        const userId = req.user;
-      
-        let cartToUpdate = await Cart.findOne({ orderedBy: userId });
-      
-        if (!cartToUpdate) {
-          throw new NotFoundError('Cart not found');
+
+    let cartToUpdate = await Cart.findOne({ orderedBy: userId });
+
+    if (cartToUpdate) {
+      const existingProductIndex = cartToUpdate.products.findIndex(
+        (product) => product.product.toString() === productId
+      );
+
+      if (existingProductIndex !== -1) {
+        // Product already exists in the cart, update quantity
+        const existingProduct = cartToUpdate.products[existingProductIndex];
+        existingProduct.quantity += parseInt(quantity);
+        existingProduct.cartPrice = existingProduct.quantity * existingProduct.price;
+      } else {
+        // Product does not exist in the cart, add new product
+        const product = await Product.findById(productId).select('price');
+
+        if (!product) {
+          throw new NotFoundError('Product not found');
         }
-      
-        for (let i = 0; i < cart.length; i++) {
-          const productId = cart[i].productId;
-          const productIndex = cartToUpdate.products.findIndex(
-            (product) => product.product.toString() === productId
-          );
-      
-          if (productIndex !== -1) {
-            const quantityToRemove = parseInt(cart[i].quantity);
-            const existingProduct = cartToUpdate.products[productIndex];
-      
-            if (existingProduct.quantity <= quantityToRemove) {
-              // Remove the whole product from the cart
-              cartToUpdate.products.splice(productIndex, 1);
-            } else {
-              // Reduce the quantity of the product
-              existingProduct.quantity -= quantityToRemove;
-              existingProduct.cartPrice = existingProduct.price * existingProduct.quantity; // Recalculate cartPrice
-            }
-          }
-        }
-      
-        // Recalculate cartSubTotal, vatDeduction, and cartTotal
-        let cartSubTotal = 0;
-        for (let i = 0; i < cartToUpdate.products.length; i++) {
-          const product = cartToUpdate.products[i];
-          cartSubTotal += product.price * product.quantity;
-        }
-      
-        let vatDeduction = cartSubTotal * 0.075;
-        let shippingFee = 250;
-        let cartTotal = cartSubTotal + vatDeduction + shippingFee;
-      
-        cartToUpdate.cartSubTotal = cartSubTotal;
-        cartToUpdate.vatDeduction = vatDeduction;
-        cartToUpdate.shippingFee = shippingFee;
-        cartToUpdate.cartTotal = cartTotal;
-      
-        let updatedCart = await cartToUpdate.save();
-      
-        res.status(200).json({
-          status: 'Success',
-          data: updatedCart,
+
+        const price = product.price;
+        const cartPrice = price * parseInt(quantity);
+
+        cartToUpdate.products.push({
+          product: productId,
+          quantity: parseInt(quantity),
+          price,
+          cartPrice,
         });
       }
+
+      // Calculate cart totals
+      let cartSubTotal = 0;
+      let cartTotal = 0;
+      let vatDeduction = 0;
+      let shippingFee = 0;
+
+      cartToUpdate.products.forEach((product) => {
+        cartSubTotal += product.cartPrice;
+      });
+
+      vatDeduction = cartSubTotal * 0.075;
+      cartTotal = cartSubTotal + vatDeduction + shippingFee;
+
+      cartToUpdate.cartSubTotal = cartSubTotal;
+      cartToUpdate.cartTotal = cartTotal;
+      cartToUpdate.vatDeduction = vatDeduction;
+
+      const updatedCart = await cartToUpdate.save();
+
+      res.status(200).json({
+        status: 'Success',
+        data: updatedCart,
+        
+      });
+    } else {
+      // Create new cart
+      const product = await Product.findById(productId).select('price');
+
+      if (!product) {
+        throw new NotFoundError('Product not found');
+      }
+
+      const price = product.price;
+      const cartPrice = price * parseInt(quantity);
+      let shippingFee = 250
+      let cartSubTotal = cartPrice;
+      let vatDeduction = cartSubTotal * 0.075;
+      let cartTotal = cartSubTotal + vatDeduction + shippingFee;
+      
+
+      const newCart = await Cart.create({
+        products: [
+          {
+            product: productId,
+            quantity: parseInt(quantity),
+            price,
+            cartPrice,
+          },
+        ],
+        orderedBy: userId,
+        cartSubTotal,
+        cartTotal,
+        vatDeduction,
+        shippingFee,
+      });
+
+      res.status(201).json({
+        status: 'Success',
+        data: newCart,
+      });
+    }
+  }
+    
+    static async removeFromCart(req, res) {
+      const { productId, quantity } = req.params;
+      const userId = req.user;
+    
+      let cartToUpdate = await Cart.findOne({ orderedBy: userId });
+    
+      if (!cartToUpdate) {
+        throw new NotFoundError('Cart not found');
+      }
+    
+      const productIndex = cartToUpdate.products.findIndex(
+        (product) => product.product.toString() === productId
+      );
+    
+      if (productIndex !== -1) {
+        const quantityToRemove = parseInt(quantity);
+        const existingProduct = cartToUpdate.products[productIndex];
+    
+        if (existingProduct.quantity <= quantityToRemove) {
+          // Remove the whole product from the cart
+          cartToUpdate.products.splice(productIndex, 1);
+        } else {
+          // Reduce the quantity of the product
+          existingProduct.quantity -= quantityToRemove;
+          existingProduct.cartPrice = existingProduct.price * existingProduct.quantity; // Recalculate cartPrice
+        }
+      }
+    
+      // Recalculate cartSubTotal, vatDeduction, and cartTotal
+      let cartSubTotal = 0;
+      for (let i = 0; i < cartToUpdate.products.length; i++) {
+        const product = cartToUpdate.products[i];
+        cartSubTotal += product.price * product.quantity;
+      }
+    
+      let vatDeduction = cartSubTotal * 0.075;
+      let shippingFee = 250;
+      let cartTotal = cartSubTotal + vatDeduction + shippingFee;
+    
+      cartToUpdate.cartSubTotal = cartSubTotal;
+      cartToUpdate.vatDeduction = vatDeduction;
+      cartToUpdate.shippingFee = shippingFee;
+      cartToUpdate.cartTotal = cartTotal;
+    
+      let updatedCart = await cartToUpdate.save();
+    
+      res.status(200).json({
+        status: 'Success',
+        data: updatedCart,
+      });
+    }
       
       static async deleteProductFromCart(req, res) {
         const { productId } = req.params;
@@ -253,6 +256,7 @@ export default class CartController {
         const userId  = req.user;
         if(!userId) throw new NotFoundError('User not found');
         const user = await User.findById(userId)
+        if(!user) throw new NotFoundError('User not found');
         let { products, cartSubTotal, shippingFee, vatDeduction } = await Cart.findOne({orderedBy: userId}).populate("products.product");
         let discount = validCode.discount;
         let cartTotal = (cartSubTotal + shippingFee + vatDeduction - discount).toFixed(2);
