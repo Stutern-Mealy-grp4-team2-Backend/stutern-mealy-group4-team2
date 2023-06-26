@@ -10,6 +10,9 @@ import { router as authRouter } from "./src/routers/auth.route.js"
 import { router as productRouter } from "./src/routers/product.route.js"
 import { router as reviewRouter } from "./src/routers/review.route.js"
 import { router as profileRouter } from "./src/routers/profile.route.js"
+import { router as cartRouter } from "./src/routers/cart.route.js"
+import { router as discountRouter } from "./src/routers/discount.route.js"
+import { router as OrderRouter } from "./src/routers/order.route.js"
 import path from "path";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';;
@@ -60,7 +63,9 @@ app.use('/api/v1/product', productRouter)
 app.use('/api/v1/reviews', reviewRouter)
 app.use('/api/v1/profile', profileRouter)
 app.use('/api/v1/categories', categoryRouter)
-
+app.use('/api/v1/cart', cartRouter)
+app.use('/api/v1/discount', discountRouter)
+app.use('/api/v1/order', OrderRouter)
 
 
 app.use(globalErrorHandler)
