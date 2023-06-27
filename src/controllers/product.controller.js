@@ -8,7 +8,7 @@ import cloudinary from "cloudinary";
 
 
 export default class ProductController {
-  static async createProduct(req, res, next) {
+  static async createProductWithPhoto(req, res, next) {
     const { category, vendor } = req.body;
     const isValidVendor = await Vendor.findOne({ name: vendor });
     if (!isValidVendor) throw new BadUserRequestError('Please provide a valid vendor');
@@ -24,26 +24,53 @@ export default class ProductController {
     // Create a custom filename
     file.name = `photo_${Date.now()}${path.parse(file.name).ext}`;
   
-    // Move the file to the desired location
     file.mv(`${config.file_upload_path}/${file.name}`, async (err) => {
       if (err) {
         console.error(err);
         return next(new FailedRequestError('Problem with file upload'));
       }
   
-      // Create the product with the uploaded photo
-      const product = await Product.create({
-        ...req.body,
-        imageUrl: file.name,
-      });
+      // Upload image to Cloudinary
+      cloudinary.v2.uploader.upload(
+        `${config.file_upload_path}/${file.name}`,
+        { folder: "product-photos" },
+        async (error, result) => {
+          if (error) {
+            console.error(error);
+            return next(new FailedRequestError('Failed to upload image to Cloudinary'));
+          }
   
-      res.status(201).json({
-        status: 'Success',
-        data: product,
-      });
+          const imageUrl = result.secure_url;
+  
+         // Create the product with the uploaded photo
+        const product = await Product.create({
+          ...req.body,
+          imageUrl,
+        });
+  
+          res.status(201).json({
+            status: "Success",
+            message: "Product created successfully",
+            data: product
+          });
+        }
+      );
     });
   }
   
+  static async createProductWithoutPhoto(req, res, next) {
+    const { category, vendor } = req.body;
+    const isValidVendor = await Vendor.findOne({ name: vendor });
+    if (!isValidVendor) throw new BadUserRequestError('Please provide a valid vendor');
+    const validCategory = await Category.findOne({ name: category.toLowerCase() });
+    if (!validCategory) throw new BadUserRequestError('Please provide a valid category');
+    const product = await Product.create({...req.body});
+        res.status(201).json({
+            status: "Success",
+            message: "Product created successfully",
+            data: product
+          });
+  }
             
     static async searchProduct (req, res) {
       const { category, vendor, name, location } = req.query;

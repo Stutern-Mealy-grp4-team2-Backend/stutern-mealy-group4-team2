@@ -10,7 +10,8 @@ import CategoryController from "../controllers/category.controller.js";
 
 const router = Router()
 
-router.post("/create", tryCatchHandler(ProductController.createProduct) )
+router.post("/create", tryCatchHandler(ProductController.createProductWithoutPhoto) )
+router.post("/createphoto", tryCatchHandler(ProductController.createProductWithPhoto) )
 router.post("/:productId", tryCatchHandler(ProductController.uploadPhoto) )
 router.get("/all", tryCatchHandler(ProductController.getAllProducts) )
 router.get("/", tryCatchHandler(ProductController.searchProduct) )
