@@ -15,12 +15,19 @@ router.post("/forgotpassword", tryCatchHandler(UserController.forgotPassword));
 router.post("/resetpassword/code", tryCatchHandler(UserController.resetPasswordCode));
 router.put("/resetpassword/:resetPasswordToken", tryCatchHandler(UserController.resetPassword));
 router.get("/users", tryCatchHandler(UserController.findAll)); // Move this route before routes with URL parameters
+router.get("/profile", userAuthMiddleWare, tryCatchHandler(UserController.getProfile));
+router.put("/profile/personalinfo", userAuthMiddleWare, tryCatchHandler(UserController.updatePersonalInfo));
+router.put("/profile/addressinfo", userAuthMiddleWare, tryCatchHandler(UserController.updateAddressInfo));
+router.put("/profile/photo", userAuthMiddleWare, tryCatchHandler(UserController.profilePhotoUpload));
 router.get("/:email", tryCatchHandler(UserController.findUser));
 router.get("/:id", tryCatchHandler(UserController.findDevUser));
 router.delete("/deleteall", tryCatchHandler(UserController.deleteAll));
 router.delete("/deleteuser/:email", tryCatchHandler(UserController.deleteUser));
 router.delete("/deleteuser/:id", tryCatchHandler(UserController.deleteDevUser));
-
+// router.get("/profile", userAuthMiddleWare, tryCatchHandler(UserController.getProfile));
+// router.put("/profile/personalinfo", userAuthMiddleWare, tryCatchHandler(UserController.updatePersonalInfo));
+// router.put("/profile/addressinfo", userAuthMiddleWare, tryCatchHandler(UserController.updateAddressInfo));
+// router.put("/profile/photo", userAuthMiddleWare, tryCatchHandler(UserController.profilePhotoUpload));
 
 
 
