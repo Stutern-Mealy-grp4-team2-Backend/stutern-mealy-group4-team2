@@ -9,12 +9,10 @@ import { router as vendorRouter } from "./src/routers/vendor.route.js"
 import { router as authRouter } from "./src/routers/auth.route.js"
 import { router as productRouter } from "./src/routers/product.route.js"
 import { router as cartRouter } from "./src/routers/cart.route.js"
-import { router as discountRouter } from "./src/routers/discount.route.js"
 import { router as OrderRouter } from "./src/routers/order.route.js"
 import path from "path";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';;
-import { router as categoryRouter } from "./src/routers/category.route.js"
 
 import { globalErrorHandler } from "./src/utils/errorHandler.js"
 import { config } from "./src/config/index.js";
@@ -58,9 +56,7 @@ app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/user', userRouter)
 app.use('/api/v1/vendor', vendorRouter)
 app.use('/api/v1/product', productRouter)
-app.use('/api/v1/categories', categoryRouter)
 app.use('/api/v1/cart', cartRouter)
-app.use('/api/v1/discount', discountRouter)
 app.use('/api/v1/order', OrderRouter)
 
 

@@ -4,6 +4,8 @@ import FavouriteController from "../controllers/favourite.controller.js";
 import { tryCatchHandler } from '../utils/tryCatch.handler.js'
 import { userAuthMiddleWare } from "../middlewares/auth.middleware.js";
 import ReviewController from "../controllers/review.controller.js";
+import CategoryController from "../controllers/category.controller.js";
+
 
 
 const router = Router()
@@ -25,6 +27,9 @@ router.get("/reviews/:productId", tryCatchHandler(ReviewController.getProductRev
 router.delete("/reviews/:reviewId", userAuthMiddleWare, tryCatchHandler(ReviewController.deleteReview) )
 router.put("/reviews/:reviewId", userAuthMiddleWare, tryCatchHandler(ReviewController.updateReview) )
 router.delete("/reviews/delete/:productId", userAuthMiddleWare, tryCatchHandler(ReviewController.deleteAllReviews) )
+router.post("/category/create", tryCatchHandler(CategoryController.createCategory));
+router.get("/category/all", tryCatchHandler(CategoryController.getAllCategories));
+router.get("/category/search", tryCatchHandler(CategoryController.searchCategory));
 
 
 
