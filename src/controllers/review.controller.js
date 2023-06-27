@@ -8,7 +8,6 @@ export default class ReviewController {
     static async createReview (req, res) {
         const { product } = req.body;
         const id = req.params.productId;
-        console.log(id, product)
         if(id !== product) throw new BadUserRequestError('Please pass a valid product ID')
         const user = req.user;
         if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid product ID')
@@ -74,7 +73,7 @@ export default class ReviewController {
       })
     }
 
-    static async deleteReviews (req, res) {
+    static async deleteAllReviews (req, res) {
       const id = req.params.productId;
       if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid review ID')
       const reviews = await Review.find({product: id})
