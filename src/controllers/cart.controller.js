@@ -7,6 +7,7 @@ export default class CartController {
 //add to cart by session
 static async addCart(req,res){
   const productId = req.params.id
+  //const productId = req.body.id
   const cart = new Cart(req.session.cart? req.session.cart : {})
   const product = await Product.findById(productId)
   if(!product){
@@ -15,7 +16,7 @@ static async addCart(req,res){
   cart.add(product, product._id)
   cart.addShippingFee(1000)
   req.session.cart = cart;
-  res.status(201).json("cart add to session")
+  res.status(201).json(req.session.cart)
 }
 //reduce cart
 static async reduceCart(req,res){

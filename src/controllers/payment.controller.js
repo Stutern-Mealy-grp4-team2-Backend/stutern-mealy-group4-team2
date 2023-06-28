@@ -17,10 +17,10 @@ router.get("/checkout",(req,res) =>{
 })
 //payment route
 router.post("/checkout", (req,res) =>{
-    // console.log(req.session.cart)
-    // if(!req.session.cart){
-    //     throw new UnAuthorizedError("Access denied")
-    // }
+    console.log(req.session.cart)
+    if(!req.session.cart){
+        throw new UnAuthorizedError("Access denied")
+    }
     const cart = new Cart(req.session.cart)
         stripe.charges.create({
             source: req.body.tokenId,
@@ -34,20 +34,18 @@ router.post("/checkout", (req,res) =>{
                 const order = new Order({
                     user:req.user.jwtId,
                     cart:cart,
+                    deliveryAddress:req.body.address,//from the request body of the stripe
                     name:req.body.name,//from the request body of the stripe
                     paymentResult:{
-                        id:req.body.stripeRes.id,
+                        id:stripeRes.id,
                         status:true,
                         update_time:Date.now(),
-                        email_address:req.body.email
-                    },
-                    deliveryAddress:req.body.address,
-                    isPaid:Date.now(),
-                    paymentMethod:req.body.type
+                        email_address:req.body.email,
+                    }
                 })
                 await order.save()
                 req.session.cart = null;
-                 res.status(200).json(stripeRes)
+                res.status(200).json(stripeRes)
              }
          })
     }
