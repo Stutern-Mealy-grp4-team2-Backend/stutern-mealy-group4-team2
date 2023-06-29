@@ -83,6 +83,7 @@ export default class UserController {
       const refresh = refreshToken(user)
       // console.log(refresh)
       user.refreshToken = refresh
+      user.accessToken = token
       await user.save()
       const userData = user.toObject();
       // delete userData._id;
@@ -119,7 +120,8 @@ export default class UserController {
       const token = generateToken(user)
       const refresh = refreshToken(user)
       // console.log(refresh)
-      user.refreshToken = refresh
+      user.refreshToken = refresh;
+      user.accessToken = token;
       await user.save()
       const userData = user.toObject();
       // delete userData._id;
@@ -203,7 +205,7 @@ export default class UserController {
       user.password = bcrypt.hashSync(req.body.password, saltRounds);
       user.resetPasswordToken = undefined;
       user.resetPasswordExpire = undefined;
-      user.refreshToken = refresh
+      user.refreshToken = refresh;
       await user.save();
       const userData = user.toObject();
       delete userData._id;
@@ -256,16 +258,17 @@ export default class UserController {
     }
 
     // Clear refresh token cookie
-    res.clearCookie('refresh_token', { httpOnly: true, maxAge: config.cookie_max_age });
+    res.cookie('refresh_token', '', { expires: new Date(0), httpOnly: true });
+    
 
     // Find the user by refresh token
     const foundUser = await User.findOne({ refreshToken: cookies.refresh_token });
     if (!foundUser) {
       return res.sendStatus(204); // Successful but no content
     }
-
     // Delete the refresh token in the database
     foundUser.refreshToken = null;
+    foundUser.accessToken = null;
     await foundUser.save();
 
     res.status(200).json({
