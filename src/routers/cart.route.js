@@ -9,6 +9,7 @@ router.post("/add-to-cart/:id",CartController.addCart)
 router.get("/shopping-cart",CartController.shoppingCart)
 router.get("/reduce/:id",CartController.reduceCart)
 router.get("/remove/:id",CartController.removeItem)
+router.post("/coupon",CartController.applyCoupon)
 
 
 

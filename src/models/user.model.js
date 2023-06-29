@@ -56,6 +56,7 @@ const UserSchema = new Schema({
   cityAndState: String,
   numberAndStreet: String,
   postalCode: Number,
+  couponCode:String,
   profilePhoto: {
     type: String,
     default: 'no-photo.jpg'

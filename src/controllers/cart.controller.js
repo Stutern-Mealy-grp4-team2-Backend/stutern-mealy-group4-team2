@@ -54,4 +54,19 @@ static async shoppingCart (req,res){
     price:cart.totalPrice
   })
 }
+//apply coupon
+static async applyCoupon (req,res){
+  const {couponId} = req.body
+  try{
+    if(!req.session.cart){
+      throw new UnAuthorizedError("Cart empty")
+    }
+    const cart = new Cart(req.session.cart)
+    cart.applyCoupon(couponId)
+    req.session.cart = cart
+    req.status(201).json(req.session.cart)
+  }catch(err){
+    res.status(500).json(err.message)
+  }
+}
 }

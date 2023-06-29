@@ -1,3 +1,4 @@
+import User from "../models/user.model.js"
 export default function Cart(oldCart) {
   this.items = oldCart.items || {};
   this.totalQuantity = oldCart.totalQuantity || 0;
@@ -52,6 +53,13 @@ export default function Cart(oldCart) {
       delete this.items[id];
     }
   };
+  this.applyCoupon = async function(couponId){
+    const user = await User.find({_id:req.user._id})
+    if(couponId === user.couponCode){
+      this.totalQuantity;
+      this.totalPrice -= 1500
+    }
+  }
 
   this.generateArray = function () {
     let arr = [];
