@@ -54,10 +54,17 @@ static async shoppingCart (req,res){
     price:cart.totalPrice
   })
 }
+//delete all shopping cart
+static async DeleteCart (req,res){
+  if(!req.session.cart){
+    throw new UnAuthorizedError("cart empty")
+  }
+  req.session.cart = null,
+  res.status(201).json("cart is empty")
+}
 //apply coupon
 static async applyCoupon (req,res){
   const {couponId} = req.body
-  try{
     if(!req.session.cart){
       throw new UnAuthorizedError("Cart empty")
     }
@@ -65,8 +72,5 @@ static async applyCoupon (req,res){
     cart.applyCoupon(couponId)
     req.session.cart = cart
     req.status(201).json(req.session.cart)
-  }catch(err){
-    res.status(500).json(err.message)
-  }
 }
 }

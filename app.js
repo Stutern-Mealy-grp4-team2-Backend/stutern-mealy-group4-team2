@@ -19,6 +19,7 @@ import { router as categoryRouter } from "./src/routers/category.route.js"
 
 import { router as orderRouter } from "./src/routers/order.route.js"
 import { router as cartRouter } from "./src/routers/cart.route.js"
+import { router as discountRouter } from "./src/routers/discount.route.js"
 import { router as stripeCheckoutRouter } from "./src/controllers/payment.controller.js"
  import { globalErrorHandler } from "./src/utils/errorHandler.js"
 import { config } from "./src/config/index.js";
@@ -82,6 +83,7 @@ app.use('/api/v1/product', productRouter)
 
 app.use('/api/v1/order', orderRouter)
 app.use('/api/v1/cart', cartRouter)
+app.use('/api/v1/discount', discountRouter)
 app.use('/api/v1/payment', stripeCheckoutRouter)
 
 app.use('/api/v1/reviews', reviewRouter)

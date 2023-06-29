@@ -1,8 +1,12 @@
 import mongoose from "mongoose";
 const discountSchema = new mongoose.Schema({
     couponCode: String,
+    couponValue:Number,
     couponValid: Date,
-    couponExpires: Date
+    user:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User"
+    }
 },{timestamps:true})
 
 
