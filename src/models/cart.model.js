@@ -58,12 +58,12 @@ export default function Cart(oldCart) {
     const discount = await Discount.findOne(couponId)
     if(!discount) throw new UnAuthorizedError("You dont have a coupon")
     if(discount.couponValid > Date.now()) throw new BadUserRequestError("Coupon has expired")
-    if(discount.user === req.user.userId){
+    if(discount.user === req.user._id){
       throw new UnAuthorizedError("You have used this coupon")
     }else{
       this.totalQuantity;
       this.totalPrice -= discount.couponValue
-      discount.user = req.user.userId
+      discount.user = req.user._id
     }
     await discount.save()
   }
