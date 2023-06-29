@@ -1,4 +1,5 @@
-import User from "../models/user.model.js"
+import { BadUserRequestError, UnAuthorizedError } from "../errors/error.js";
+import Discount from "../models/discount.model.js"
 export default function Cart(oldCart) {
   this.items = oldCart.items || {};
   this.totalQuantity = oldCart.totalQuantity || 0;
@@ -54,11 +55,11 @@ export default function Cart(oldCart) {
     }
   };
   this.applyCoupon = async function(couponId){
-    const user = await User.find({_id:req.user._id})
-    if(couponId === user.couponCode){
+    const discount = await Discount.findOne(couponId)
+    if(!discount) throw new UnAuthorizedError("You dont have a coupon")
+    if(discount.couponValid > Date.now()) throw new BadUserRequestError("Coupon has expired")
       this.totalQuantity;
       this.totalPrice -= 1500
-    }
   }
 
   this.generateArray = function () {
