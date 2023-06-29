@@ -50,7 +50,7 @@ export default class UserController {
       
      await user.save()
        // Set body of email
-      const message = `Hi ${name}, Your verification code is: ${verifyEmailToken}`
+      const message = `Hi ${name},\n\n Your verification code is: ${verifyEmailToken}`
       
       const mailSent = await sendEmail({
           email: user.email,
@@ -432,16 +432,53 @@ export default class UserController {
     })
   }
 
-  static async deleteUser(req, res) {
-    const { email } = req.params;
-    const user = await User.findOneAndRemove({ email });
+  static async requestUserDelete(req, res) {
+    const userId = req.user;
+    // Fetch the user from the database
+    const user = await User.findById(userId);
+    
     if (!user) throw new NotFoundError('User Not Found')
+    const email = user.email;
+    // Get reset token
+    const verifyEmailToken = Math.floor(100000 + Math.random() * 900000).toString();
+    // Get reset Expire
+    const verifyEmailTokenExpire = Date.now() + config.token_expiry;
+    // Update user with reset token and expiration date
+    user.verifyEmailToken = verifyEmailToken;
+    user.verifyEmailTokenExpire = verifyEmailTokenExpire
+    await user.save();
+
+    const message = `Hello ${user.name},\nWe received an account deletion request from you and we would love to confirm if it emanated from you. Please ignore if you did not make this request.\n\nYour verification code is: ${verifyEmailToken}`;
+    
+    await sendEmail({
+        email,
+        subject: 'Email Verification',
+        message
+      })
+
+      res.status(200).json({
+        status: 'Success',
+        message: `An email verification code has been sent to ${email}`,
+        message
+      })
+  }
+  
+  static async deleteUser(req, res) {
+    const userId = req.user;
+    const verifyEmailToken = req.body.verifyEmailToken;
+    const validUser = await User.findById(userId);
+    if (!validUser) throw new NotFoundError('User Not Found')
+     // Find the user by the verification token
+    const user = await User.findOneAndRemove({
+      verifyEmailToken,
+      verifyEmailTokenExpire: { $gt: Date.now() },
+    });
+    if(!user)  throw new BadUserRequestError('Invalid or expired verification token');
     res.status(200).json({
     message: `${user.name} with ${user.email} deleted successfully`,
     status: "Success",
     })
   }
-  
  
 
   static async deleteAll(req, res) {
