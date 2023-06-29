@@ -459,7 +459,7 @@ export default class UserController {
       res.status(200).json({
         status: 'Success',
         message: `An email verification code has been sent to ${email}`,
-        message
+        //message
       })
   }
   
