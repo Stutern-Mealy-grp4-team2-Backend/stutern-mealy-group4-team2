@@ -9,6 +9,7 @@ router.post("/create", tryCatchHandler(ProductController.createProduct) )
 router.get("/all", tryCatchHandler(ProductController.getAllProducts) )
 router.get("/", tryCatchHandler(ProductController.searchProduct) )
 router.get("/category", tryCatchHandler(ProductController.searchProductsByCategory) )
+router.delete("/all", tryCatchHandler(ProductController.deleteAllProducts) )
 
 
 export { router }
