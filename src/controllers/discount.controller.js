@@ -15,8 +15,8 @@ export default class DiscountController{
     }
     //get a single coupon
     static async getCoupon(req,res){
-        const {coupon} = req.body
-        const discount = await Discount.findOne(coupon)
+        const {couponCode} = req.body
+        const discount = await Discount.findOne({couponCode})
         if(!discount) throw new BadUserRequestError("Coupon not found")
         res.status(201).json(discount)
     }
@@ -28,8 +28,8 @@ export default class DiscountController{
     }
     //update coupon
     static async updateCoupon(req,res){
-        const {couponCode} = req.body
-        const discount = await Discount.findOneAndUpdate({couponCode},{
+        const {couponId} = req.params
+        const discount = await Discount.findByIdAndUpdate({_id:couponId},{
             $set:req.body
         },{
             new: true,
@@ -42,7 +42,7 @@ export default class DiscountController{
     //delete coupon
     static async DeleteCoupon(req,res){
         const {couponCode} = req.body
-        const discount = await Discount.findOneAndDelete(couponCode)
+        const discount = await Discount.findOneAndDelete({couponCode})
         if(!discount) throw new BadUserRequestError("Invalid coupon")
         res.status(201).json("Coupon has been deleted")
        

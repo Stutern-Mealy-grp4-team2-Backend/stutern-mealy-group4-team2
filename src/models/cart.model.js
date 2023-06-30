@@ -54,18 +54,18 @@ export default function Cart(oldCart) {
       delete this.items[id];
     }
   };
-  this.applyCoupon = async function(couponId){
-    const discount = await Discount.findOne(couponId)
+  this.applyCoupon = async function(couponId,req){
+    const discount = await Discount.findOne({couponCode:couponId})
     if(!discount) throw new UnAuthorizedError("You dont have a coupon")
-    if(discount.couponValid > Date.now()) throw new BadUserRequestError("Coupon has expired")
+    if(discount.couponValid < Date.now()) throw new BadUserRequestError("Coupon has expired")
     if(discount.user === req.user._id){
       throw new UnAuthorizedError("You have used this coupon")
     }else{
-      this.totalQuantity;
-      this.totalPrice -= discount.couponValue
       discount.user = req.user._id
+      await discount.save()
     }
-    await discount.save()
+    this.totalQuantity;
+    this.totalPrice = this.totalPrice - discount.couponValue
   }
 
   this.generateArray = function () {

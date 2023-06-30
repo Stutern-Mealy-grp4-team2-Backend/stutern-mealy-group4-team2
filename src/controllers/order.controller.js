@@ -61,6 +61,21 @@ export default class OrderController {
         res.status(500).json({message:err.message})
     }
   }
+  //delete all order
+  static async deleteAllOrders (req,res) {
+    try{
+    const order = await Order.deleteMany()
+    if(!order){
+      throw new UnAuthorizedError("Order not found")
+    }
+    res.status(200).json({
+      status:"success",
+      message:"Order has been deleted"
+    })
+    }catch(err){
+        res.status(500).json({message:err.message})
+    }
+  }
 //get a meal order
   static async getMealOrder (req, res) {
     try {

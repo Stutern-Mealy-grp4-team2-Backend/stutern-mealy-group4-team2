@@ -69,8 +69,8 @@ static async applyCoupon (req,res){
       throw new UnAuthorizedError("Cart empty")
     }
     const cart = new Cart(req.session.cart)
-    cart.applyCoupon(couponId)
+    await cart.applyCoupon(couponId,req)
     req.session.cart = cart
-    req.status(201).json(req.session.cart)
+    res.status(201).json(req.session.cart)
 }
 }
