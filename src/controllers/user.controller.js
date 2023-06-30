@@ -99,8 +99,7 @@ export default class UserController {
       status: "Success",
       message: 'Account activated successfully.',
       data: {
-        user: userData,
-        access_token: token
+        user: userData
       },
       })
     }
@@ -138,8 +137,7 @@ export default class UserController {
         status: "Success",
         message: "Login successful",
         data: {
-          user: userData,
-          access_token: token
+          user: userData
         },
       })
     }
@@ -206,6 +204,7 @@ export default class UserController {
       user.resetPasswordToken = undefined;
       user.resetPasswordExpire = undefined;
       user.refreshToken = refresh;
+      user.accessToken = token;
       await user.save();
       const userData = user.toObject();
       delete userData._id;
@@ -221,8 +220,7 @@ export default class UserController {
         status: "Success",
         message: "Password updated successfully",
         data: {
-          user: userData,
-          access_token: token
+          user: userData
         },
       });
     }
@@ -242,11 +240,14 @@ export default class UserController {
           console.log(decoded); // Log the decoded object
           throw new UnAuthorizedError('There is something wrong with the Refresh token');
         }
-        const token = generateToken(foundUser)
-        res.status(201).json({
-          access_token: token
-        })
+        
     })
+    const token = generateToken(foundUser)
+        foundUser.accessToken = token;
+        await foundUser.save()
+        res.status(201).json({
+          token
+        })
   }
 
   //logout controller
