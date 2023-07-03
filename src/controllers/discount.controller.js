@@ -1,16 +1,19 @@
 import { BadUserRequestError, NotFoundError, UnAuthorizedError, FailedRequestError } from "../errors/error.js"
 import Discount from "../models/discount.model.js"
+import { randomString } from "../utils/discount.generator.js"
 
 
 export default class DiscountController {
     static async createDiscountCode(req, res ) {
-        const discountCode = await new Discount({
+        const discountCode = randomString();
+        const discount = await new Discount({
            ...req.body,
-           expiry: Date.now() + 15 * 60 * 60 * 1000,
+           discountCode,
+           expiry: Date.now() + 7 * 24 * 60 * 60 * 1000,
         }).save();
         res.status(201).json({
             status: 'Success',
-            data: discountCode
+            data: discount
         })
     }
 
@@ -28,9 +31,8 @@ export default class DiscountController {
         const id = req.params.discountId
         const validCode = await Discount.findById(id);
         if(!validCode) throw new NotFoundError('Please pass in a valid discount Id');
-        validCode.name = req.body.name;
-        validCode.discount = req.body.discount;
-        validCode.expiry = Date.now() + 24 * 60 * 60 * 1000;
+        validCode.discountValue = req.body.discountValue;
+        validCode.expiry = Date.now() + 7 * 24 * 60 * 60 * 1000;
         await validCode.save();
         res.status(200).json({
             status: 'Success',

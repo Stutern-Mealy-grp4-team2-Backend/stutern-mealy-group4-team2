@@ -1,18 +1,15 @@
 import { Schema, model, Types, Query }  from "mongoose";
 
 const DiscountSchema = new Schema({
-    name: {
+    discountCode: {
         type: String,
-        trim: true,
-        unique: true,
-        uppercase: true,
         required: true,
     },
     expiry: {
         type: Date,
         required: true,
     },
-    discount: {
+    discountValue: {
         type: Number,
         required: true,
     },

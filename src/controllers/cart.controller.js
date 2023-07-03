@@ -50,7 +50,7 @@ export default class CartController {
       let cartSubTotal = 0;
       let cartTotal = 0;
       let vatDeduction = 0;
-      let shippingFee = 0;
+      let shippingFee = 250;
 
       cartToUpdate.products.forEach((product) => {
         cartSubTotal += product.cartPrice;
@@ -249,7 +249,7 @@ export default class CartController {
     static async applyDiscount(req, res ) {
         const { discountCode } = req.body;
         const validCode = await Discount.findOne({
-            name: discountCode,
+            discountCode,
             expiry: { $gt: Date.now() },
         });
         if (!validCode) throw new UnAuthorizedError("Invalid or expired discount code");
