@@ -258,8 +258,9 @@ export default class CartController {
         const user = await User.findById(userId)
         if(!user) throw new NotFoundError('User not found');
         let { products, cartSubTotal, shippingFee, vatDeduction } = await Cart.findOne({orderedBy: userId}).populate("products.product");
-        let discount = validCode.discount;
+        let discount = validCode.discountValue;
         let cartTotal = (cartSubTotal + shippingFee + vatDeduction - discount).toFixed(2);
+        console.log(cartTotal, cartSubTotal, shippingFee, vatDeduction, discount)
         const newCart = await Cart.findOneAndUpdate(
             { orderedBy: userId },
             { cartTotal, discount },
