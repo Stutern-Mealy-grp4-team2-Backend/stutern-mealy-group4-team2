@@ -7,7 +7,9 @@ const orderSchema = new Schema({
         required: true,
         ref:"User"
     },
-    cart:{type:Object, required: true},
+    cart:{type:Object, 
+        required: true
+    },
     DeliveryAddress:{type:String},
     paymentMethod:{
         type:String, 
