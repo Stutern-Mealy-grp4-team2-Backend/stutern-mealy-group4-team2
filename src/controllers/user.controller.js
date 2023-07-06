@@ -365,7 +365,7 @@ export default class UserController {
             const imageUrl = result.secure_url;
     
             // Update the photo with the Cloudinary image URL
-            await User.findByIdAndUpdate(userId, { profilePhoto: file.name })
+            await User.findByIdAndUpdate(userId, { profilePhoto: imageUrl })
     
             res.status(200).json({
               status: "Success",
