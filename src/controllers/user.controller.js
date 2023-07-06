@@ -27,7 +27,6 @@ export default class UserController {
       } else if (existingUser.verifyEmailTokenExpire < Date.now()) {
       // Remove the existing user if the verification token has expired
       await User.deleteOne({ _id: existingUser._id });
-      throw new BadUserRequestError('An error occured. Please try signing up again.')
       } else {
       throw new BadUserRequestError(`Please log in to ${email} to get your verification link.`);
       }
@@ -428,7 +427,7 @@ export default class UserController {
   }
 
   static async findAll(req, res) {
-    const users =  await User.find({}, 'name email -_id')
+    const users =  await User.find()
     if(users.length < 1) throw new NotFoundError('No user found')
     res.status(200).json({
       status: "Success",
