@@ -427,7 +427,7 @@ export default class UserController {
   }
 
   static async findAll(req, res) {
-    const users =  await User.find()
+    const users =  await User.find({}, 'name email -_id')
     if(users.length < 1) throw new NotFoundError('No user found')
     res.status(200).json({
       status: "Success",
