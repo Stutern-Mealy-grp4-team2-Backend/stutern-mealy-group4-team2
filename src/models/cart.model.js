@@ -131,7 +131,7 @@ export default function Cart(oldCart) {
       }
     }
     if(this.totalQuantity <= 0){
-      delete this.items[shipping];
+      delete this.items['shipping'];
     }
   };
 //remove all the items
@@ -147,7 +147,7 @@ export default function Cart(oldCart) {
       delete this.items[id];
     }
     if (this.totalQuantity <= 0){
-      delete this.items[shipping]
+      delete this.items['shipping']
     }
   };
 
