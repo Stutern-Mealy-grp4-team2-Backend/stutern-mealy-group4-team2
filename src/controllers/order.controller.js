@@ -78,8 +78,9 @@ export default class OrderController {
   }
 //get a meal order
   static async getMealOrder (req, res) {
+    const {orderId} = req.params
     try {
-      const order = await Order.findById(req.params.id);
+      const order = await Order.findById({_id:orderId});
       if (order) {
         res.json(order);
       } else {
@@ -92,8 +93,9 @@ export default class OrderController {
   
   //update delivery of order
 static async updateDelivery  (req, res) {
+  const {id} = req.params
     try {
-      const order = await Order.findById(req.params.id);
+      const order = await Order.findById({_id:id});
   
       if (order) {
         order.isDelivered = true;
@@ -111,8 +113,8 @@ static async updateDelivery  (req, res) {
   //get all user order
   static async getAllOrder (req,res){
     try{
-        const orders = await Order.find({user:req.user.jwtId})
-        if(!orders || orders.length === 0) throw new BadRequestError("You have no order")
+        const orders = await Order.find({user:req.user._id})
+        if(!orders || orders.length === 0) throw new BadUserRequestError("You have no order")
         let cartOrder;
         orders.forEach(function(order){
             cartOrder = new Cart(order.cart)

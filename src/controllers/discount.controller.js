@@ -21,11 +21,30 @@ export default class DiscountController{
         res.status(201).json(discount)
     }
     //get coupon
-    static async getAllCoupon(req,res){
-        const discount = await Discount.find()
-        if(!discount) throw new BadUserRequestError("Coupon not found")
-        res.status(201).json(discount)
-    }
+    static async getAllCoupon(req, res) {
+        const discount = await Discount.find();
+        if (!discount) throw new BadUserRequestError("Coupon not found");
+      
+        const { expiredCoupons, activeCoupons, allCoupons } = req.query;
+        const couponObject = {};
+      
+        if (expiredCoupons) {
+          couponObject.expired = discount.filter(coupon => coupon.couponValid < Date.now());
+        }
+      
+        if (activeCoupons) {
+          couponObject.active = discount.filter(coupon => coupon.couponValid > Date.now());
+        }
+      
+        if (allCoupons) {
+          couponObject.discount = discount;
+        }
+      
+        res.status(200).json(couponObject);
+      }
+      
+    
+
     //update coupon
     static async updateCoupon(req,res){
         const {couponId} = req.params

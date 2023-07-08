@@ -3,10 +3,10 @@ const discountSchema = new mongoose.Schema({
     couponCode: String,
     couponValue:Number,
     couponValid: Date,
-    user:{
+    user:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"
-    }
+    }]
 },{timestamps:true})
 
 
