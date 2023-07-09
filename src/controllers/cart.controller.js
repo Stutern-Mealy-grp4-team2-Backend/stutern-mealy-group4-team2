@@ -48,7 +48,7 @@ export default class CartController {
 
       // Calculate cart totals
       let cartSubTotal = 0;
-      let cartTotal = 0;
+      // let cartTotal = 0;
       let vatDeduction = 0;
       let shippingFee = 250;
 
@@ -57,8 +57,12 @@ export default class CartController {
       });
 
       vatDeduction = cartSubTotal * 0.075;
-      cartTotal = cartSubTotal + vatDeduction + shippingFee;
-
+      let cartTotal = cartSubTotal + vatDeduction + shippingFee;
+      // Check if discount is available
+    if (cartToUpdate.discount && cartToUpdate.discount > 0) {
+      // Deduct discount from the new cartTotal
+      cartTotal -= cartToUpdate.discount;
+    }
       cartToUpdate.cartSubTotal = cartSubTotal;
       cartToUpdate.cartTotal = cartTotal;
       cartToUpdate.vatDeduction = vatDeduction;
@@ -147,7 +151,10 @@ export default class CartController {
       let vatDeduction = cartSubTotal * 0.075;
       let shippingFee = 250;
       let cartTotal = cartSubTotal + vatDeduction + shippingFee;
-    
+      if (cartToUpdate.discount && cartToUpdate.discount > 0) {
+        // Deduct discount from the new cartTotal
+        cartTotal -= cartToUpdate.discount;
+      }
       cartToUpdate.cartSubTotal = cartSubTotal;
       cartToUpdate.vatDeduction = vatDeduction;
       cartToUpdate.shippingFee = shippingFee;
@@ -198,10 +205,13 @@ export default class CartController {
             const product = cartToUpdate.products[i];
             cartSubTotal += product.quantity * product.price;
           }
-          const vatDeduction = cartSubTotal * 0.075;
-          const shippingFee = 250;
-          const cartTotal = cartSubTotal + vatDeduction + shippingFee;
-      
+          let vatDeduction = cartSubTotal * 0.075;
+          let shippingFee = 250;
+          let cartTotal = cartSubTotal + vatDeduction + shippingFee;
+          if (cartToUpdate.discount && cartToUpdate.discount > 0) {
+            // Deduct discount from the new cartTotal
+            cartTotal -= cartToUpdate.discount;
+          }
           // Update the cart with the new values
           cartToUpdate.cartSubTotal = cartSubTotal;
           cartToUpdate.vatDeduction = vatDeduction;
@@ -260,7 +270,6 @@ export default class CartController {
         let { products, cartSubTotal, shippingFee, vatDeduction } = await Cart.findOne({orderedBy: userId}).populate("products.product");
         let discount = validCode.discountValue;
         let cartTotal = (cartSubTotal + shippingFee + vatDeduction - discount).toFixed(2);
-        console.log(cartTotal, cartSubTotal, shippingFee, vatDeduction, discount)
         const newCart = await Cart.findOneAndUpdate(
             { orderedBy: userId },
             { cartTotal, discount },
