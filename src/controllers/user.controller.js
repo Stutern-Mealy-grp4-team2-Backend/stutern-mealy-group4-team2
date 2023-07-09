@@ -28,7 +28,7 @@ export default class UserController {
       // Remove the existing user if the verification token has expired
       await User.deleteOne({ _id: existingUser._id });
       } else {
-      throw new BadUserRequestError(`Please log in to ${email} to get your verification link.`);
+      throw new BadUserRequestError(`Please log in to ${email} to get your verification code.`);
       }
     }
       // Generate verification token
