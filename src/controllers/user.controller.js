@@ -92,7 +92,7 @@ export default class UserController {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge 
+      maxAge
     });
       res.status(201).json({
       status: "Success",
