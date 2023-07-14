@@ -50,7 +50,6 @@
 //         })
 
 import Discount from "../models/discount.model.js"
-<<<<<<< HEAD
 import { BadUserRequestError } from "../errors/error.js"
 import { randomNum } from "../utils/randomNum.js"
 export default class DiscountController{
@@ -167,3 +166,5 @@ export default class DiscountController{
 // 
 //     }
 }
+
+
