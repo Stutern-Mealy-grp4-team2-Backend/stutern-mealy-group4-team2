@@ -275,7 +275,7 @@
 // }
 // 
 
-import { BadUserRequestError, UnAuthorizedError } from "../errors/error.js"
+import { BadUserRequestError, UnAuthorizedError, NotFoundError } from "../errors/error.js"
 import Product from "../models/product.model.js"
 import Cart from "../models/cart.model.js"
 
@@ -284,11 +284,11 @@ export default class CartController {
 //add to cart by session
 static async addCart(req,res){
   const productId = req.params.id
-  const cart = new Cart(req.session.cart? req.session.cart : {items:{}})
   const product = await Product.findById(productId)
   if(!product){
-    throw new BadUserRequestError("product no found")
+    throw new NotFoundError("product no found")
   }
+  const cart = new Cart(req.session.cart? req.session.cart : {items:{}})
   cart.addShippingFee(1000)
   cart.add(product, product._id)
   
@@ -299,6 +299,7 @@ static async addCart(req,res){
 static async reduceCart(req,res){
   try {
     const productId = req.params.id
+    if(!productId) throw new NotFoundError("This product is not in your cart")
     const cart = new Cart(req.session.cart? req.session.cart : {})
     cart.reduceByOne(productId);
     req.session.cart = cart;
@@ -309,15 +310,12 @@ static async reduceCart(req,res){
 }
 //remove all items
 static async removeItem (req,res){
-  try {
     const productId = req.params.id
+    if(!productId) throw new NotFoundError("This product is not in your cart")
     const cart = new Cart(req.session.cart? req.session.cart : {items:{}})
     cart.removeItem(productId);
     req.session.cart = cart;
     res.status(201).json(req.session.cart)
-  } catch (err) {
-    res.status(201).json(err)
-  }
 }
 //get all cart
 static async shoppingCart (req,res){
@@ -338,6 +336,7 @@ static async DeleteCart (req,res){
   }
   req.session.cart = null,
   res.status(201).json("cart is empty")
+  if(req.session.cart === null) throw new UnAuthorizedError("cart empty") 
 }
 //apply coupon
 static async applyCoupon (req,res){

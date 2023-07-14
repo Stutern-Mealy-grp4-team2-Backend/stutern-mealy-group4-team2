@@ -5,11 +5,12 @@ import Stripe from "stripe";
 import { UnAuthorizedError } from "../errors/error.js";
 import Cart from "../models/cart.model.js";
 import Order from "../models/order.model.js";
+import { userAuthMiddleWare } from "../middlewares/auth.middleware.js";
 
 const stripe = Stripe(config.stripe_secret_keys)
 
 //checkout route
-router.get("/checkout",(req,res) =>{
+router.get("/checkout",userAuthMiddleWare,(req,res) =>{
     try{
     if(!req.session.cart){
         throw new UnAuthorizedError("Access denied")
@@ -21,7 +22,7 @@ router.get("/checkout",(req,res) =>{
     }
 })
 //payment route
-router.post("/checkout", (req,res) =>{
+router.post("/checkout",userAuthMiddleWare,(req,res) =>{
     if(!req.session.cart){
         throw new UnAuthorizedError("Access denied")
     }
@@ -35,7 +36,7 @@ router.post("/checkout", (req,res) =>{
                 res.status(500).json(stripeErr)
             }else{
                  const order = new Order({
-                     user:req.user.jwtId,//req.body.user
+                     user:req.user._id,//req.body.user
                      cart:cart,//req.body.cart
                      deliveryAddress:stripeRes.source.address_city,//req.body.address,//from the request body of the stripe
                      name:stripeRes.source.name,//from the request body of the stripe

@@ -157,22 +157,60 @@ export default function Cart(oldCart) {
     const storedItem = this.items[id];
     if (storedItem) {
       storedItem.quantity--;
+  
       const productTotalPrice = storedItem.item.discount > 0 ? storedItem.item.price - (storedItem.item.price * (storedItem.item.discount / 100)) : storedItem.item.price;
       storedItem.price = productTotalPrice * storedItem.quantity;
+  
       this.totalQuantity--;
-      this.subtotal -= productTotalPrice ;
+      this.subtotal -= productTotalPrice;
+  
       this.discount = 0;
-      this.shippingFee = this.items.shipping? this.items.shipping.price : 0
-      this.VAT = (7.5/100)*this.subtotal;
-      this.total = this.subtotal + this.discount + this.shippingFee + this.VAT;
+      for (const itemId in this.items) {
+        this.discount += this.items[itemId].item.discount > 0 ? (this.items[itemId].item.price - (this.items[itemId].item.price * (this.items[itemId].item.discount / 100))) * this.items[itemId].quantity : 0;
+      }
+  
+      this.shippingFee = this.items.shipping ? this.items.shipping.price : 0;
+      this.VAT = (7.5 / 100) * this.subtotal;
+      this.total = this.subtotal + this.shippingFee + this.VAT - this.discount;
+  
       if (storedItem.quantity <= 0) {
         delete this.items[id];
       }
     }
-    if(this.totalQuantity <= 0){
+  
+    if (this.totalQuantity <= 0) {
       delete this.items['shipping'];
+      this.shippingFee = 0;
+      this.total = 0;
     }
   };
+  
+  // this.reduceByOne = function (id) {
+  //   const storedItem = this.items[id];
+  //   if (storedItem) {
+  //     storedItem.quantity--;
+  //     const productTotalPrice = storedItem.item.discount > 0 ? storedItem.item.price - (storedItem.item.price * (storedItem.item.discount / 100)) : storedItem.item.price;
+  //     storedItem.price = productTotalPrice * storedItem.quantity;
+  //     console.log('this', this.totalQuantity)
+  //     this.totalQuantity--;
+  //     this.subtotal -= productTotalPrice ;
+  //     this.discount = 0;
+  //     this.shippingFee = this.items.shipping? this.items.shipping.price : 0
+  //     this.VAT = (7.5/100)*this.subtotal;
+  //     this.total = this.subtotal + this.discount + this.shippingFee + this.VAT;
+  //     if (storedItem.quantity <= 0) {
+  //       delete this.items[id];
+  //     }
+  //   }
+  //   if(this.totalQuantity <= 0){
+  //     console.log('thi',this.items[shippingId])
+  //     console.log('thi2',this.items[shipping])
+  //     console.log('thi3',this.items['shipping'])
+  //     delete this.items['shipping'];
+  //   }
+  // };
+
+
 //remove all the items
   this.removeItem = function (id) {
     const storedItem = this.items[id];
@@ -182,11 +220,14 @@ export default function Cart(oldCart) {
       this.discount = 0;
       this.shippingFee = this.items.shipping? this.items.shipping.price : 0
       this.VAT = (7.5/100)*this.subtotal;
-      this.total = this.subtotal + this.discount + this.shippingFee + this.VAT;
+      // this.total = this.subtotal + this.discount + this.shippingFee + this.VAT;
       delete this.items[id];
     }
+    this.total = this.subtotal + this.discount + this.shippingFee + this.VAT;
     if (this.totalQuantity <= 0){
       delete this.items['shipping']
+      this.shippingFee = 0;
+      this.total = 0;
     }
   };
 
