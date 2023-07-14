@@ -27,9 +27,8 @@ export default class UserController {
       } else if (existingUser.verifyEmailTokenExpire < Date.now()) {
       // Remove the existing user if the verification token has expired
       await User.deleteOne({ _id: existingUser._id });
-      throw new BadUserRequestError('An error occured. Please try signing up again.')
       } else {
-      throw new BadUserRequestError(`Please log in to ${email} to get your verification link.`);
+      throw new BadUserRequestError(`Please log in to ${email} to get your verification code.`);
       }
     }
       // Generate verification token
@@ -50,7 +49,7 @@ export default class UserController {
       
      await user.save()
        // Set body of email
-      const message = `Hi ${name}, Your verification code is: ${verifyEmailToken}`
+      const message = `Hi ${name},\n\n Your verification code is: ${verifyEmailToken}`
       
       const mailSent = await sendEmail({
           email: user.email,
@@ -83,6 +82,7 @@ export default class UserController {
       const refresh = refreshToken(user)
       // console.log(refresh)
       user.refreshToken = refresh
+      user.accessToken = token
       await user.save()
       const userData = user.toObject();
       // delete userData._id;
@@ -98,8 +98,7 @@ export default class UserController {
       status: "Success",
       message: 'Account activated successfully.',
       data: {
-        user: userData,
-        access_token: token
+        user: userData
       },
       })
     }
@@ -119,7 +118,8 @@ export default class UserController {
       const token = generateToken(user)
       const refresh = refreshToken(user)
       // console.log(refresh)
-      user.refreshToken = refresh
+      user.refreshToken = refresh;
+      user.accessToken = token;
       await user.save()
       const userData = user.toObject();
       // delete userData._id;
@@ -136,8 +136,7 @@ export default class UserController {
         status: "Success",
         message: "Login successful",
         data: {
-          user: userData,
-          access_token: token
+          user: userData
         },
       })
     }
@@ -203,7 +202,8 @@ export default class UserController {
       user.password = bcrypt.hashSync(req.body.password, saltRounds);
       user.resetPasswordToken = undefined;
       user.resetPasswordExpire = undefined;
-      user.refreshToken = refresh
+      user.refreshToken = refresh;
+      user.accessToken = token;
       await user.save();
       const userData = user.toObject();
       delete userData._id;
@@ -219,8 +219,7 @@ export default class UserController {
         status: "Success",
         message: "Password updated successfully",
         data: {
-          user: userData,
-          access_token: token
+          user: userData
         },
       });
     }
@@ -240,11 +239,14 @@ export default class UserController {
           console.log(decoded); // Log the decoded object
           throw new UnAuthorizedError('There is something wrong with the Refresh token');
         }
-        const token = generateToken(foundUser)
-        res.status(201).json({
-          access_token: token
-        })
+        
     })
+    const token = generateToken(foundUser)
+        foundUser.accessToken = token;
+        await foundUser.save()
+        res.status(201).json({
+          token
+        })
   }
 
   //logout controller
@@ -256,16 +258,17 @@ export default class UserController {
     }
 
     // Clear refresh token cookie
-    res.clearCookie('refresh_token', { httpOnly: true, maxAge: config.cookie_max_age });
+    res.cookie('refresh_token', '', { expires: new Date(0), httpOnly: true });
+    
 
     // Find the user by refresh token
     const foundUser = await User.findOne({ refreshToken: cookies.refresh_token });
     if (!foundUser) {
       return res.sendStatus(204); // Successful but no content
     }
-
     // Delete the refresh token in the database
     foundUser.refreshToken = null;
+    foundUser.accessToken = null;
     await foundUser.save();
 
     res.status(200).json({
@@ -361,7 +364,7 @@ export default class UserController {
             const imageUrl = result.secure_url;
     
             // Update the photo with the Cloudinary image URL
-            await User.findByIdAndUpdate(userId, { profilePhoto: file.name })
+            await User.findByIdAndUpdate(userId, { profilePhoto: imageUrl })
     
             res.status(200).json({
               status: "Success",
@@ -432,16 +435,53 @@ export default class UserController {
     })
   }
 
-  static async deleteUser(req, res) {
-    const { email } = req.params;
-    const user = await User.findOneAndRemove({ email });
+  static async requestUserDelete(req, res) {
+    const userId = req.user;
+    // Fetch the user from the database
+    const user = await User.findById(userId);
+    
     if (!user) throw new NotFoundError('User Not Found')
+    const email = user.email;
+    // Get reset token
+    const verifyEmailToken = Math.floor(100000 + Math.random() * 900000).toString();
+    // Get reset Expire
+    const verifyEmailTokenExpire = Date.now() + config.token_expiry;
+    // Update user with reset token and expiration date
+    user.verifyEmailToken = verifyEmailToken;
+    user.verifyEmailTokenExpire = verifyEmailTokenExpire
+    await user.save();
+
+    const message = `Hello ${user.name},\nWe received an account deletion request from you and we would love to confirm if it emanated from you. Please ignore if you did not make this request.\n\nYour verification code is: ${verifyEmailToken}`;
+    
+    await sendEmail({
+        email,
+        subject: 'Email Verification',
+        message
+      })
+
+      res.status(200).json({
+        status: 'Success',
+        message: `An email verification code has been sent to ${email}`,
+        //message
+      })
+  }
+  
+  static async deleteUser(req, res) {
+    const userId = req.user;
+    const verifyEmailToken = req.body.verifyEmailToken;
+    const validUser = await User.findById(userId);
+    if (!validUser) throw new NotFoundError('User Not Found')
+     // Find the user by the verification token
+    const user = await User.findOneAndRemove({
+      verifyEmailToken,
+      verifyEmailTokenExpire: { $gt: Date.now() },
+    });
+    if(!user)  throw new BadUserRequestError('Invalid or expired verification token');
     res.status(200).json({
     message: `${user.name} with ${user.email} deleted successfully`,
     status: "Success",
     })
   }
-  
  
 
   static async deleteAll(req, res) {

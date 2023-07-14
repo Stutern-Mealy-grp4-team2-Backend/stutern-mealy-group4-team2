@@ -1,22 +1,38 @@
 
-// import { Schema, model, Types, Query }  from "mongoose";
+// <<<<<<< HEAD
+// // import { Schema, model, Types, Query }  from "mongoose";
 
+// // const DiscountSchema = new Schema({
+// //     name: {
+// //         type: String,
+// //         trim: true,
+// //         unique: true,
+// //         uppercase: true,
+// //         required: true,
+// //     },
+// //     expiry: {
+// //         type: Date,
+// //         required: true,
+// //     },
+// //     discount: {
+// //         type: Number,
+// //         required: true,
+// //     },
+// =======
 // const DiscountSchema = new Schema({
-//     name: {
+//     discountCode: {
 //         type: String,
-//         trim: true,
-//         unique: true,
-//         uppercase: true,
 //         required: true,
 //     },
 //     expiry: {
 //         type: Date,
 //         required: true,
 //     },
-//     discount: {
+//     discountValue: {
 //         type: Number,
 //         required: true,
 //     },
+// >>>>>>> 23850de23e06479ac30b2bfa690166e4805038e8
     
 // }, {
 //   timestamps: true

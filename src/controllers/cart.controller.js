@@ -1,4 +1,4 @@
-
+// <<<<<<< HEAD
 // import {  NotFoundError, UnAuthorizedError } from "../errors/error.js"
 // import User from "../models/user.model.js"
 // import Product from "../models/product.model.js"
@@ -273,6 +273,7 @@
 //     }
 
 // }
+// 
 
 import { BadUserRequestError, UnAuthorizedError } from "../errors/error.js"
 import Product from "../models/product.model.js"
@@ -308,11 +309,15 @@ static async reduceCart(req,res){
 }
 //remove all items
 static async removeItem (req,res){
+  try {
     const productId = req.params.id
     const cart = new Cart(req.session.cart? req.session.cart : {items:{}})
     cart.removeItem(productId);
     req.session.cart = cart;
     res.status(201).json(req.session.cart)
+  } catch (err) {
+    res.status(201).json(err)
+  }
 }
 //get all cart
 static async shoppingCart (req,res){

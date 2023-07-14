@@ -36,6 +36,10 @@ const UserSchema = new Schema({
     type:String,
     default:null
   },
+  accessToken:{
+    type:String,
+    default:null
+  },
   verifyEmailToken: String,
   verifyEmailTokenExpire: Date,
   resetPasswordToken: String,
