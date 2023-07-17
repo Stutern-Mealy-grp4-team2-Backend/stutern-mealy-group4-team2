@@ -1,23 +1,76 @@
 import Product from "../models/product.model.js"
 import Vendor from "../models/vendor.model.js"
 import Category from "../models/category.model.js"
-import { BadUserRequestError, NotFoundError } from "../errors/error.js"
-import slugify from "slugify";
+import { BadUserRequestError, NotFoundError, FailedRequestError } from "../errors/error.js"
+import {config} from "../config/index.js";
+import path from "path";
+import cloudinary from "cloudinary";
 
 
 export default class ProductController {
-    static async createProduct (req, res) {
-        const { category, vendor } = req.body;
-        const isValidVendor = await Vendor.findOne({name: vendor });
-        if(!isValidVendor) throw new BadUserRequestError('Please provide a valid vendor');
-        const validCategory = await Category.findOne({ name: category.toLowerCase() })
-        if(!validCategory) throw new BadUserRequestError('Please provide a valid category');
-        const product = await Product.create(req.body)
+  static async createProductWithPhoto(req, res, next) {
+    const { category, vendor } = req.body;
+    const isValidVendor = await Vendor.findOne({ name: vendor });
+    if (!isValidVendor) throw new BadUserRequestError('Please provide a valid vendor');
+    const validCategory = await Category.findOne({ name: category.toLowerCase() });
+    if (!validCategory) throw new BadUserRequestError('Please provide a valid category');
+  
+    if (!req.files || !req.files.file) throw new BadUserRequestError('Please upload a product photo');
+    const file = req.files.file;
+  
+    if (!file.mimetype.startsWith('image')) throw new BadUserRequestError('Please upload the required format');
+    if (file.size > config.max_file_upload) throw new BadUserRequestError(`Please upload an image less than ${config.max_file_upload}`);
+  
+    // Create a custom filename
+    file.name = `photo_${Date.now()}${path.parse(file.name).ext}`;
+  
+    file.mv(`${config.file_upload_path}/${file.name}`, async (err) => {
+      if (err) {
+        console.error(err);
+        return next(new FailedRequestError('Problem with file upload'));
+      }
+  
+      // Upload image to Cloudinary
+      cloudinary.v2.uploader.upload(
+        `${config.file_upload_path}/${file.name}`,
+        { folder: "product-photos" },
+        async (error, result) => {
+          if (error) {
+            console.error(error);
+            return next(new FailedRequestError('Failed to upload image to Cloudinary'));
+          }
+  
+          const imageUrl = result.secure_url;
+  
+         // Create the product with the uploaded photo
+        const product = await Product.create({
+          ...req.body,
+          imageUrl,
+        });
+  
+          res.status(201).json({
+            status: "Success",
+            message: "Product created successfully",
+            data: product
+          });
+        }
+      );
+    });
+  }
+  
+  static async createProductWithoutPhoto(req, res, next) {
+    const { category, vendor } = req.body;
+    const isValidVendor = await Vendor.findOne({ name: vendor });
+    if (!isValidVendor) throw new BadUserRequestError('Please provide a valid vendor');
+    const validCategory = await Category.findOne({ name: category.toLowerCase() });
+    if (!validCategory) throw new BadUserRequestError('Please provide a valid category');
+    const product = await Product.create({...req.body});
         res.status(201).json({
-        status: "Success",
-       data: product,
-      })
-    }
+            status: "Success",
+            message: "Product created successfully",
+            data: product
+          });
+  }
             
     static async searchProduct (req, res) {
       const { category, vendor, name, location } = req.query;
@@ -100,7 +153,61 @@ export default class ProductController {
         data: products,
       });
     }
-  
+    
+    static async uploadPhoto(req, res, next) {
+      const Id = req.params.productId;
+    
+      // Fetch the product from the database
+      const product = await Product.findById(Id);
+      if (!product) throw new BadUserRequestError('Please provide a valid Product ID');
+    
+      // Update the personal information
+      if (!req.files) throw new BadUserRequestError('Please upload a product photo');
+    
+      const file = req.files.file;
+      if (!file.mimetype.startsWith('image')) throw new BadUserRequestError('Please upload the required format');
+    
+      // Check file size
+      if (file.size > config.max_file_upload) throw new BadUserRequestError(`Please upload an image less than ${config.max_file_upload}`);
+    
+      // Create a custom filename
+      file.name = `photo_${Id}${path.parse(file.name).ext}`;
+    
+      // Move the file to the desired location
+      file.mv(`${config.file_upload_path}/${file.name}`, async (err) => {
+        if (err) {
+          console.error(err);
+          return next(new FailedRequestError('Problem with file upload'));
+        }
+    
+        // Upload image to Cloudinary
+        cloudinary.v2.uploader.upload(
+          `${config.file_upload_path}/${file.name}`,
+          { folder: "product-photos" },
+          async (error, result) => {
+            if (error) {
+              console.error(error);
+              return next(new FailedRequestError('Failed to upload image to Cloudinary'));
+            }
+    
+            const imageUrl = result.secure_url;
+    
+            // Update the product with the Cloudinary image URL
+            await Product.findByIdAndUpdate(Id, { imageUrl });
+    
+            res.status(200).json({
+              status: "Success",
+              message: "Product photo updated successfully",
+              data: imageUrl
+            });
+          }
+        );
+      });
+    }
+    
+
+    
+
     static async deleteAllProducts (req, res) {
       const products = await Product.find()
       if(products.length < 1) throw new NotFoundError('No Product available');

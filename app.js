@@ -2,7 +2,7 @@ import express  from "express";
 import  './src/config/passport.js';
 import passport from 'passport';
 import mongoose from "mongoose";
-import fileupload from "express-fileupload";
+import fileUpload from "express-fileupload";
 import morgan from "morgan";
 import session from "express-session";
 import MongoStore from "connect-mongo";
@@ -10,15 +10,14 @@ import { router as userRouter } from "./src/routers/user.route.js"
 import { router as vendorRouter } from "./src/routers/vendor.route.js"
 import { router as authRouter } from "./src/routers/auth.route.js"
 import { router as productRouter } from "./src/routers/product.route.js"
-import { router as reviewRouter } from "./src/routers/review.route.js"
-import { router as profileRouter } from "./src/routers/profile.route.js"
+import { router as cartRouter } from "./src/routers/cart.route.js"
+//import { router as OrderRouter } from "./src/routers/order.route.js"
 import path from "path";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';;
-import { router as categoryRouter } from "./src/routers/category.route.js"
 
 import { router as orderRouter } from "./src/routers/order.route.js"
-import { router as cartRouter } from "./src/routers/cart.route.js"
+//import { router as cartRouter } from "./src/routers/cart.route.js"
 import { router as discountRouter } from "./src/routers/discount.route.js"
 import { router as stripeCheckoutRouter } from "./src/controllers/payment.controller.js"
  import { globalErrorHandler } from "./src/utils/errorHandler.js"
@@ -64,9 +63,9 @@ app.use(express.json())
 //cookie parser middleware
 app.use(cookieParser())
 // For file uploads
-app.use(fileupload())
+app.use(fileUpload())
 // Set static folder
-app.use(express.static(path.join(__dirname, 'profile')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 //cookie parser middleware
 app.use(cookieParser())
@@ -82,14 +81,19 @@ app.use('/api/v1/user', userRouter)
 app.use('/api/v1/vendor', vendorRouter)
 app.use('/api/v1/product', productRouter)
 
+// app.use('/api/v1/cart', cartRouter)
+// app.use('/api/v1/order', OrderRouter)
+
+
 app.use('/api/v1/order', orderRouter)
 app.use('/api/v1/cart', cartRouter)
 app.use('/api/v1/discount', discountRouter)
 app.use('/api/v1/payment', stripeCheckoutRouter)
 
-app.use('/api/v1/reviews', reviewRouter)
-app.use('/api/v1/profile', profileRouter)
-app.use('/api/v1/categories', categoryRouter)
+//app.use('/api/v1/reviews', reviewRouter)
+//app.use('/api/v1/profile', profileRouter)
+//app.use('/api/v1/categories', categoryRouter)
+
 
 
 
