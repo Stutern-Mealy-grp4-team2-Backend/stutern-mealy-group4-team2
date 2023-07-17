@@ -6,7 +6,7 @@ import {config} from "../config/index.js"
 import { sendEmail } from "../utils/sendEmail.js"
 import { generateToken, refreshToken } from "../utils/jwt.utils.js"
 import path from "path";
-import jwt, { verify } from "jsonwebtoken"
+import jwt from "jsonwebtoken"
 import cloudinary from "cloudinary";
 
 
