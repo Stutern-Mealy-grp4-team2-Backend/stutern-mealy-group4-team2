@@ -24,12 +24,13 @@ export default class AuthController {
       const refresh = refreshToken(user);
       // Update the user's refresh token in the database
       user.refreshToken = refresh;
+      user.accessToken = token;
       await user.save();
       const userData = user.toObject();
-      delete userData._id;
+      // delete userData._id;
       delete userData.password;
-      delete userData.googleId;
-      const maxAge = parseInt(config.cookie_max_age);
+      // delete userData.googleId;
+      const maxAge = config.cookie_max_age;
       res.cookie("refresh_token", refresh, { 
       httpOnly: true,
       secure: true,
@@ -40,8 +41,7 @@ export default class AuthController {
         status: 'Success',
         message: 'Login successful',
         data: {
-          user: userData,
-          access_token: token
+          user: userData
         },
       });
   
@@ -61,11 +61,12 @@ export default class AuthController {
       const refresh = refreshToken(user);
       // Update the user's refresh token in the database
       user.refreshToken = refresh;
+      user.accessToken = token;
       await user.save();
       const userData = user.toObject();
-      delete userData._id;
+      // delete userData._id;
       delete userData.password;
-      const maxAge = parseInt(config.cookie_max_age);
+      const maxAge = config.cookie_max_age;
       res.cookie("refresh_token", refresh, { 
       httpOnly: true,
       secure: true,
@@ -76,8 +77,7 @@ export default class AuthController {
       status: 'Success',
       message: 'Login successful',
       data: {
-        user: userData,
-        access_token: token
+        user: userData
       },
     });
 

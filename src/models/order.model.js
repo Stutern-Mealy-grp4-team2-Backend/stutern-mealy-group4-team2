@@ -1,3 +1,62 @@
+
+// import { Schema, model, Types, Query }  from "mongoose";
+
+// const OrderSchema = new Schema({
+//     orderItems: [{
+//         type: Types.ObjectId,
+//         ref: 'Cart',
+//         required: true
+//     }],
+//     deliveryName: String,
+//     deliveryAddress: {
+//     type: String,
+//     min: [5, 'Address must contain at least 5 characters long'],
+//     // required: [true, 'Please add a valid address']
+//     },
+//     scheduledDeliveryTime: Date,
+
+//     product: {
+//     type: Types.ObjectId,
+//     ref: 'Product',
+//     },
+//     orderStatus: {
+//         type: String,
+//         enum: ['pending', 'processing', 'cancelled', 'cash on delievery', 'dispatched', 'completed'],
+//         default: 'pending'
+//     },
+//     isDelivered: {
+//         type: Boolean,
+//         default: false,
+//     },
+//     isPaid: {
+//         type: Boolean,
+//         default: false,
+//     },
+//     paidAt: Date,
+//     orderedBy: {
+//         type: Types.ObjectId,
+//         ref: 'User',
+//     },
+//     totalPrice: Number,
+    
+//     phone: {
+//     type: String,
+//     unique: true,
+//     // required: [true, 'Please add a valid phone']
+//     },
+//     notes: String,
+//     paymentMethod: {
+//         type: String,
+//         default: 'online'
+//     },
+    
+// }, {
+//     timestamps: true
+// })
+
+// export default model('Order', OrderSchema)
+
+
 import mongoose from "mongoose";
 const Schema = mongoose.Schema
 
@@ -7,26 +66,10 @@ const orderSchema = new Schema({
         required: true,
         ref:"User"
     },
-    orderItems:[
-        // product:{
-        //     type:String, 
-        //     required: true,
-        //     ref:"Product"
-        // }
-        //products:[
-            {
-                productId:{
-                    type:mongoose.Schema.Types.ObjectId ,
-                    ref:"Product"
-                },
-                quantity:{
-                    type: Number,
-                    default:0
-                }
-            }
-          // ],
-        ],
-    address:{type:String, required: true},
+    cart:{type:Object, 
+        required: true
+    },
+    DeliveryAddress:{type:String},
     paymentMethod:{
         type:String, 
         required: true
@@ -37,14 +80,17 @@ const orderSchema = new Schema({
         update_time:{type:String},
         email_address:{type:String},
     },
+    shippingFee:{
+        type:Number,
+        default:500
+    },
     totalPrice:{
         type:Number,
-        required: true,
+        //required: true,
         default:0.0
     },
     isPaid:{
         type:Boolean,
-        required: true,
         default:false
     },
     paidAt:{
@@ -52,25 +98,23 @@ const orderSchema = new Schema({
     },
     isDelivered:{
         type:Boolean,
-        required: true,
         default:false
     },
-    deliverdAt:{
+    deliveredAt:{
         type: Date
     },
     location:[{
         lat:{
             type: Number,
             default:0,
-            required: true
         },
         long:{
             type: Number,
             default:0,
-            required: true
         }
     }
     ]
 }, {timestamps: true})
 
 export default mongoose.model("Order", orderSchema)
+

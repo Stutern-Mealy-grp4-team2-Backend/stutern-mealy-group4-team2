@@ -36,24 +36,9 @@ const UserSchema = new Schema({
     type:String,
     default:null
   },
-  cart:{
-    items:[
-      {
-          productId:{
-              type: Types.ObjectId,
-              ref:"Product"
-          },
-          quantity:{
-              type: Number,
-              default:0
-          }
-      },
-     ],
-     totalPrice:{
-      type:Number,
-      required: true,
-      default:0
-    }
+  accessToken:{
+    type:String,
+    default:null
   },
   verifyEmailToken: String,
   verifyEmailTokenExpire: Date,
@@ -80,10 +65,10 @@ const UserSchema = new Schema({
     default: 'no-photo.jpg'
   },
 
-//   favourites: [{
-//     type: Types.ObjectId,
-//     ref: 'Product'
-//   }],
+  favourites: [{
+    type: Types.ObjectId,
+    ref: 'Product'
+  }],
   
 //   location: {
 //     type: {

@@ -1,6 +1,14 @@
 import dotenv from "dotenv"
 dotenv.config()
 
+import cloudinary from "cloudinary";
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
 
 
 export const production = {
@@ -28,5 +36,8 @@ export const production = {
   facebook_app_secret: process.env.PRODUCTION_FACEBOOK_APP_SECRET,
   facebook_callback_url: process.env.PRODUCTION_FACEBOOK_CALLBACK_URL,
   max_file_upload: process.env.PRODUCTION_MAX_FILE_UPLOAD,
-  file_upload_path: process.env.PRODUCTION_FILE_UPLOAD_PATH
+  file_upload_path: process.env.PRODUCTION_FILE_UPLOAD_PATH,
+  cloud_name: process.env.PRODUCTION_CLOUD_NAME,
+  api_key: process.env.PRODUCTION_API_KEY,
+  api_secret: process.env.PRODUCTION_API_SECRET
 }

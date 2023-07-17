@@ -1,12 +1,20 @@
 import dotenv from "dotenv"
 dotenv.config()
 
+import cloudinary from "cloudinary";
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
 
 export const development = {
   mongodb_connection_url: process.env.DEV_MONGODB_CONNECTION_URL,
   bycrypt_salt_round: +process.env.DEV_BCRYPT_SALT_ROUND,
   jwt_secret_key: process.env.DEV_JWT_SECRET,
-  refresh_secret_key: process.env.REFRESH_SECRET_KEY,
+  refresh_secret_key: process.env.DEV_REFRESH_SECRET_KEY,
   port: +process.env.PORT,
   jwt_expiry: process.env.DEV_JWT_EXPIRY,
   refresh_expiry: process.env.DEV_REFRESH_EXPIRY,
@@ -26,5 +34,8 @@ export const development = {
   facebook_app_secret: process.env.DEV_FACEBOOK_APP_SECRET,
   facebook_callback_url: process.env.DEV_FACEBOOK_CALLBACK_URL,
   max_file_upload: process.env.DEV_MAX_FILE_UPLOAD,
-  file_upload_path: process.env.DEV_FILE_UPLOAD_PATH
+  file_upload_path: process.env.DEV_FILE_UPLOAD_PATH,
+  cloud_name: process.env.DEV_CLOUD_NAME,
+  api_key: process.env.DEV_API_KEY,
+  api_secret: process.env.DEV_API_SECRET
 }

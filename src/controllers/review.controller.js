@@ -6,11 +6,12 @@ import {Types} from "mongoose";
 
 export default class ReviewController {
     static async createReview (req, res) {
-        //const { product } = req.body;
-        const product = req.params.productId = req.body.product;
+        const { product } = req.body;
+        const id = req.params.productId;
+        if(id !== product) throw new BadUserRequestError('Please pass a valid product ID')
         const user = req.user;
-        if (!Types.ObjectId.isValid(product)) throw new BadUserRequestError('Please pass a valid product ID')
-        const availableProduct = await Product.findById(product)
+        if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid product ID')
+        const availableProduct = await Product.findById(id)
         if(!availableProduct) throw new BadUserRequestError('Please pass a valid product ID'); 
         const review = await Review.create({user, ...req.body})
         res.status(201).json({
@@ -42,6 +43,7 @@ export default class ReviewController {
       })
     }
     
+    
     static async updateReview (req, res) {
       const id = req.params.reviewId;
       if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid review ID')
@@ -71,7 +73,7 @@ export default class ReviewController {
       })
     }
 
-    static async deleteReviews (req, res) {
+    static async deleteAllReviews (req, res) {
       const id = req.params.productId;
       if (!Types.ObjectId.isValid(id)) throw new BadUserRequestError('Please pass a valid review ID')
       const reviews = await Review.find({product: id})
